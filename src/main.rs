@@ -60,7 +60,7 @@ fn main() {
     ))
     .expect("Failed to create device");
 
-    let size = window.inner_size();
+    let mut size = window.inner_size();
     let surface_caps = surface.get_capabilities(&adapter);
     // Shader code in this tutorial assumes an sRGB surface texture. Using a different
     // one will result all the colors coming out darker. If you want to support non
@@ -234,6 +234,18 @@ fn main() {
                 // submit will accept anything that implements IntoIter
                 queue.submit(std::iter::once(encoder.finish()));
                 output.present();
+            }
+            Event::WindowEvent {
+                event: WindowEvent::Resized(new_size),
+                ..
+            } => {
+                size = new_size;
+                let config = wgpu::SurfaceConfiguration {
+                    width: size.width,
+                    height: size.height,
+                    ..config.clone()
+                };
+                surface.configure(&device, &config);
             }
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
