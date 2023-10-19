@@ -1,4 +1,5 @@
-use wgpu::{Backends, Instance, util::DeviceExt};
+use glyph_brush::{Section, Text};
+use wgpu::{util::DeviceExt, Backends, Instance};
 use winit::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
@@ -17,17 +18,14 @@ impl Vertex {
         wgpu::VertexBufferLayout {
             array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
-            attributes: &[
-                wgpu::VertexAttribute {
-                    offset: 0,
-                    shader_location: 0,
-                    format: wgpu::VertexFormat::Float32x3,
-                }
-            ]
+            attributes: &[wgpu::VertexAttribute {
+                offset: 0,
+                shader_location: 0,
+                format: wgpu::VertexFormat::Float32x3,
+            }],
         }
     }
 }
- 
 
 fn main() {
     // Initialize the event loop
@@ -100,7 +98,7 @@ fn main() {
             entry_point: "vs_main", // 1.
             buffers: &[
                 Vertex::desc(), // 2.
-            ],           // 2.
+            ], // 2.
         },
         fragment: Some(wgpu::FragmentState {
             // 3.
@@ -146,23 +144,33 @@ fn main() {
             position: [0.0, 0.5, 0.0],
         },
     ];
-    
-    let vertex_buffer = device.create_buffer_init(
-        &wgpu::util::BufferInitDescriptor {
-            label: Some("Vertex Buffer"),
-            contents: bytemuck::cast_slice(VERTEX_DATA),
-            usage: wgpu::BufferUsages::VERTEX,
-        }
-    );
+
+    let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        label: Some("Vertex Buffer"),
+        contents: bytemuck::cast_slice(VERTEX_DATA),
+        usage: wgpu::BufferUsages::VERTEX,
+    });
+
+    let mut staging_belt = wgpu::util::StagingBelt::new(1024);
+
+    let cascadia: &[u8] = include_bytes!("font/Cascadia.ttf");
+    let font = wgpu_glyph::ab_glyph::FontArc::try_from_slice(cascadia).unwrap();
+    let mut glyph_brush =
+        wgpu_glyph::GlyphBrushBuilder::using_font(font).build(&device, surface_format);
 
     // Main event loop
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
 
         match event {
+            Event::MainEventsCleared => {
+                window.request_redraw();
+            }
             Event::RedrawRequested(window_id) if window_id == window.id() => {
                 let output = surface.get_current_texture().unwrap();
-                let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
+                let view = output
+                    .texture
+                    .create_view(&wgpu::TextureViewDescriptor::default());
                 let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
                     label: Some("Render Encoder"),
                 });
@@ -189,7 +197,40 @@ fn main() {
                     render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
                     render_pass.draw(0..3, 0..1);
                 }
-            
+
+                glyph_brush.queue(Section {
+                    screen_position: (30.0, 30.0),
+                    bounds: (size.width as f32, size.height as f32),
+                    text: vec![Text::new("Hello wgpu_glyph!")
+                        .with_color([0.0, 0.0, 0.0, 1.0])
+                        .with_scale(40.0)],
+                    ..Section::default()
+                });
+
+                glyph_brush.queue(Section {
+                    screen_position: (30.0, 90.0),
+                    bounds: (size.width as f32, size.height as f32),
+                    text: vec![Text::new("Hello wgpu_glyph!")
+                        .with_color([1.0, 1.0, 1.0, 1.0])
+                        .with_scale(40.0)],
+                    ..Section::default()
+                });
+
+                // Draw the text
+                glyph_brush
+                    .draw_queued(
+                        &device,
+                        &mut staging_belt,
+                        &mut encoder,
+                        &view,
+                        size.width,
+                        size.height,
+                    )
+                    .unwrap();
+
+                // Remember to reset the staging belt at the end of the frame
+                staging_belt.finish();
+
                 // submit will accept anything that implements IntoIter
                 queue.submit(std::iter::once(encoder.finish()));
                 output.present();
@@ -198,7 +239,7 @@ fn main() {
                 event: WindowEvent::CloseRequested,
                 ..
             } => *control_flow = ControlFlow::Exit,
-           
+
             _ => {}
         }
     });
