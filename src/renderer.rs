@@ -192,4 +192,15 @@ impl Renderer {
     pub fn surface_config(&self) -> &wgpu::SurfaceConfiguration {
         &self.config
     }
+
+    pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
+        self.size = new_size;
+        let config = wgpu::SurfaceConfiguration {
+            width: self.size.width,
+            height: self.size.height,
+            ..self.config.clone()
+        };
+        self.surface.configure(&self.device, &self.config);
+        self.config = config;
+    }
 }

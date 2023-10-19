@@ -24,8 +24,8 @@ fn main() {
 
     let cascadia: &[u8] = include_bytes!("font/Cascadia.ttf");
     let font = wgpu_glyph::ab_glyph::FontArc::try_from_slice(cascadia).unwrap();
-    let mut glyph_brush =
-        wgpu_glyph::GlyphBrushBuilder::using_font(font).build(renderer.device(), renderer.surface_format());
+    let mut glyph_brush = wgpu_glyph::GlyphBrushBuilder::using_font(font)
+        .build(renderer.device(), renderer.surface_format());
 
     // Main event loop
     event_loop.run(move |event, _, control_flow| {
@@ -40,9 +40,12 @@ fn main() {
                 let view = output
                     .texture
                     .create_view(&wgpu::TextureViewDescriptor::default());
-                let mut encoder = renderer.device().create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                    label: Some("Render Encoder"),
-                });
+                let mut encoder =
+                    renderer
+                        .device()
+                        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                            label: Some("Render Encoder"),
+                        });
                 {
                     let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                         label: Some("Render Pass"),
@@ -107,15 +110,7 @@ fn main() {
             Event::WindowEvent {
                 event: WindowEvent::Resized(new_size),
                 ..
-            } => {
-                size = new_size;
-                let config = wgpu::SurfaceConfiguration {
-                    width: size.width,
-                    height: size.height,
-                    ..renderer.surface_config().clone()
-                };
-                renderer.surface().configure(renderer.device(), &config);
-            }
+            } => renderer.resize(new_size),
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
                 ..
