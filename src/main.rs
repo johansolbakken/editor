@@ -167,7 +167,7 @@ fn main() {
                     label: Some("Render Encoder"),
                 });
                 {
-                    let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                    let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                         label: Some("Render Pass"),
                         color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                             view: &view,
@@ -184,6 +184,10 @@ fn main() {
                         })],
                         depth_stencil_attachment: None,
                     });
+
+                    render_pass.set_pipeline(&render_pipeline);
+                    render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
+                    render_pass.draw(0..3, 0..1);
                 }
             
                 // submit will accept anything that implements IntoIter
