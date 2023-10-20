@@ -1,4 +1,5 @@
 use glyph_brush::{Section, Text};
+use renderer::TextSpec;
 use winit::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
@@ -24,8 +25,10 @@ fn main() {
 
     let cascadia: &[u8] = include_bytes!("font/Cascadia.ttf");
     let font = wgpu_glyph::ab_glyph::FontArc::try_from_slice(cascadia).unwrap();
+    renderer.init_font(font.clone());
     let mut glyph_brush = wgpu_glyph::GlyphBrushBuilder::using_font(font)
         .build(renderer.device(), renderer.surface_format());
+    renderer.set_text_brush(glyph_brush);
 
     // Main event loop
     event_loop.run(move |event, _, control_flow| {
@@ -70,40 +73,15 @@ fn main() {
                     render_pass.draw(0..3, 0..1);
                 }
 
-                glyph_brush.queue(Section {
-                    screen_position: (30.0, 30.0),
-                    bounds: (size.width as f32, size.height as f32),
-                    text: vec![Text::new("Hello wgpu_glyph!")
-                        .with_color([0.0, 0.0, 0.0, 1.0])
-                        .with_scale(40.0)],
-                    ..Section::default()
+                renderer.draw_text(TextSpec { 
+                    text: "Hello wgpu_glyph!",
+                    scale: 40.0,
+                    ..Default::default()
                 });
 
-                glyph_brush.queue(Section {
-                    screen_position: (30.0, 90.0),
-                    bounds: (size.width as f32, size.height as f32),
-                    text: vec![Text::new("Hello wgpu_glyph!")
-                        .with_color([1.0, 1.0, 1.0, 1.0])
-                        .with_scale(40.0)],
-                    ..Section::default()
-                });
-
-                // Draw the text
-                glyph_brush
-                    .draw_queued(
-                        renderer.device(),
-                        &mut staging_belt,
-                        &mut encoder,
-                        &view,
-                        size.width,
-                        size.height,
-                    )
-                    .unwrap();
-
-                // Remember to reset the staging belt at the end of the frame
+                // End render pass
+                renderer.flush_text(&view, size, &mut staging_belt, &mut encoder);
                 staging_belt.finish();
-
-                // submit will accept anything that implements IntoIter
                 renderer.queue().submit(std::iter::once(encoder.finish()));
                 output.present();
             }

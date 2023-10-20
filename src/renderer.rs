@@ -1,4 +1,8 @@
-use wgpu::{util::DeviceExt, Backends, Instance};
+use std::rc::Rc;
+
+use glyph_brush::{Section, Text};
+use glyph_brush_layout::ab_glyph::FontArc;
+use wgpu::{util::DeviceExt, Backends, CommandEncoder, Instance, SurfaceTexture, TextureView, RenderPass};
 
 // lib.rs
 #[repr(C)]
@@ -32,6 +36,26 @@ pub struct Renderer {
     size: winit::dpi::PhysicalSize<u32>,
     render_pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
+    text_brush: Option<wgpu_glyph::GlyphBrush<()>>,
+}
+
+#[derive(Debug)]
+pub struct TextSpec {
+    pub screen_position: (f32, f32),
+    pub color: [f32; 4],
+    pub scale: f32,
+    pub text: &'static str,
+}
+
+impl Default for TextSpec {
+    fn default() -> Self {
+        Self {
+            screen_position: (0.0, 0.0),
+            color: [1.0, 1.0, 1.0, 1.0],
+            scale: 16.0,
+            text: "",
+        }
+    }
 }
 
 impl Renderer {
@@ -162,6 +186,7 @@ impl Renderer {
             size,
             render_pipeline,
             vertex_buffer,
+            text_brush: None,
         }
     }
 
@@ -202,5 +227,52 @@ impl Renderer {
         };
         self.surface.configure(&self.device, &self.config);
         self.config = config;
+    }
+
+    pub fn init_font(&mut self, font: FontArc) {
+        let glyph_brush = wgpu_glyph::GlyphBrushBuilder::using_font(font)
+            .build(&self.device, self.surface_format);
+        self.text_brush = Some(glyph_brush);
+    }
+
+    pub fn draw_text(&mut self, text_spec: TextSpec) {
+        match &mut self.text_brush {
+            Some(text_brush) => {
+                text_brush.queue(Section {
+                    screen_position: text_spec.screen_position,
+                    bounds: (self.size.width as f32, self.size.height as f32),
+                    text: vec![Text::new(text_spec.text)
+                        .with_color(text_spec.color)
+                        .with_scale(text_spec.scale)],
+                    ..Section::default()
+                });
+            }
+            None => {
+                println!("[WARNING] No text brush set");
+            }
+        }
+    }
+
+    pub fn set_text_brush(&mut self, text_brush: wgpu_glyph::GlyphBrush<()>) {
+        self.text_brush = Some(text_brush);
+    }
+
+    pub fn flush_text(&mut self, view: &TextureView, size: winit::dpi::PhysicalSize<u32>, mut staging_belt: &mut wgpu::util::StagingBelt, mut encoder: &mut CommandEncoder) {
+        match &mut self.text_brush {
+            Some(text_brush) => {
+                text_brush.draw_queued(
+                    &self.device,
+                    &mut staging_belt,
+                    &mut encoder,
+                    &view,
+                    size.width,
+                    size.height,
+                )
+                .unwrap();
+            }
+            None => {
+                println!("[WARNING] No text brush set");
+            }
+        }
     }
 }
