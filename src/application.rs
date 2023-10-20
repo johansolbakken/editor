@@ -7,8 +7,10 @@ pub struct App {
 
 impl App {
     pub fn new() -> Self {
+        let mut text_view = TextView::new();
+        text_view.set_font_size(24.0);
         Self {
-            text_view : TextView::new(),
+            text_view,
             text_buffer: String::from(""),
         }
     }

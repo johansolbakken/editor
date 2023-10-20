@@ -55,4 +55,8 @@ impl TextView {
     pub fn set_height(&mut self, height: f64) {
         self.height = height;
     }
+
+    pub fn set_font_size(&mut self, font_size: f64) {
+        self.font_size = font_size;
+    }
 }
