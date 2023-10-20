@@ -40,6 +40,14 @@ fn main() {
             Event::MainEventsCleared => {
                 window.request_redraw();
             }
+            Event::WindowEvent {
+                event: WindowEvent::KeyboardInput { input, .. },
+                ..
+            } => {
+                if let Some(key) = input.virtual_keycode {
+                    app.on_key_event(key,input.state == winit::event::ElementState::Pressed);
+                }
+            }
             Event::RedrawRequested(window_id) if window_id == window.id() => {
                 let output = renderer.surface().get_current_texture().unwrap();
                 let view = output

@@ -35,6 +35,7 @@ pub struct Renderer {
     render_pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
     text_brush: Option<wgpu_glyph::GlyphBrush<()>>,
+    dpi_factor: f64,
 }
 
 #[derive(Debug)]
@@ -42,7 +43,7 @@ pub struct TextSpec {
     pub screen_position: (f32, f32),
     pub color: [f32; 4],
     pub scale: f32,
-    pub text: &'static str,
+    pub text: String,
 }
 
 impl Default for TextSpec {
@@ -51,7 +52,7 @@ impl Default for TextSpec {
             screen_position: (0.0, 0.0),
             color: [1.0, 1.0, 1.0, 1.0],
             scale: 16.0,
-            text: "",
+            text: String::from(""),
         }
     }
 }
@@ -173,6 +174,8 @@ impl Renderer {
             usage: wgpu::BufferUsages::VERTEX,
         });
 
+        let dpi_factor = window.scale_factor();
+
         Self {
             instance,
             surface,
@@ -185,6 +188,7 @@ impl Renderer {
             render_pipeline,
             vertex_buffer,
             text_brush: None,
+            dpi_factor,
         }
     }
 
@@ -235,7 +239,7 @@ impl Renderer {
                 text_brush.queue(Section {
                     screen_position: text_spec.screen_position,
                     bounds: (self.size.width as f32, self.size.height as f32),
-                    text: vec![Text::new(text_spec.text)
+                    text: vec![Text::new(text_spec.text.as_str())
                         .with_color(text_spec.color)
                         .with_scale(text_spec.scale)],
                     ..Section::default()
@@ -268,5 +272,9 @@ impl Renderer {
                 println!("[WARNING] No text brush set");
             }
         }
+    }
+
+    pub fn dpi_factor(&self) -> f64 {
+        self.dpi_factor
     }
 }
