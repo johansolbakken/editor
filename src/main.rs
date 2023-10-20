@@ -1,5 +1,3 @@
-use glyph_brush::{Section, Text};
-use renderer::TextSpec;
 use winit::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
@@ -7,6 +5,8 @@ use winit::{
 };
 
 mod renderer;
+mod application;
+mod text_view;
 
 fn main() {
     // Initialize the event loop
@@ -19,16 +19,18 @@ fn main() {
         .unwrap();
 
     let mut renderer = renderer::Renderer::new(&window);
-    let mut size = window.inner_size();
+    let size = window.inner_size();
 
     let mut staging_belt = wgpu::util::StagingBelt::new(1024);
 
     let cascadia: &[u8] = include_bytes!("font/Cascadia.ttf");
     let font = wgpu_glyph::ab_glyph::FontArc::try_from_slice(cascadia).unwrap();
     renderer.init_font(font.clone());
-    let mut glyph_brush = wgpu_glyph::GlyphBrushBuilder::using_font(font)
+    let glyph_brush = wgpu_glyph::GlyphBrushBuilder::using_font(font)
         .build(renderer.device(), renderer.surface_format());
     renderer.set_text_brush(glyph_brush);
+
+    let mut app = application::App::new();
 
     // Main event loop
     event_loop.run(move |event, _, control_flow| {
@@ -57,9 +59,9 @@ fn main() {
                             resolve_target: None,
                             ops: wgpu::Operations {
                                 load: wgpu::LoadOp::Clear(wgpu::Color {
-                                    r: 0.1,
-                                    g: 0.2,
-                                    b: 0.3,
+                                    r: 0.0,
+                                    g: 0.0,
+                                    b: 0.0,
                                     a: 1.0,
                                 }),
                                 store: true,
@@ -69,15 +71,11 @@ fn main() {
                     });
 
                     render_pass.set_pipeline(renderer.render_pipeline());
-                    render_pass.set_vertex_buffer(0, renderer.vertex_buffer().slice(..));
-                    render_pass.draw(0..3, 0..1);
+                    //render_pass.set_vertex_buffer(0, renderer.vertex_buffer().slice(..));
+                    //render_pass.draw(0..3, 0..1);
                 }
 
-                renderer.draw_text(TextSpec { 
-                    text: "Hello wgpu_glyph!",
-                    scale: 40.0,
-                    ..Default::default()
-                });
+                app.update(&mut renderer);
 
                 // End render pass
                 renderer.flush_text(&view, size, &mut staging_belt, &mut encoder);

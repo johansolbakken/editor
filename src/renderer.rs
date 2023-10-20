@@ -1,8 +1,6 @@
-use std::rc::Rc;
-
 use glyph_brush::{Section, Text};
 use glyph_brush_layout::ab_glyph::FontArc;
-use wgpu::{util::DeviceExt, Backends, CommandEncoder, Instance, SurfaceTexture, TextureView, RenderPass};
+use wgpu::{util::DeviceExt, Backends, CommandEncoder, Instance, TextureView};
 
 // lib.rs
 #[repr(C)]
@@ -83,7 +81,7 @@ impl Renderer {
         ))
         .expect("Failed to create device");
 
-        let mut size = window.inner_size();
+        let size = window.inner_size();
         let surface_caps = surface.get_capabilities(&adapter);
         // Shader code in this tutorial assumes an sRGB surface texture. Using a different
         // one will result all the colors coming out darker. If you want to support non
@@ -212,10 +210,6 @@ impl Renderer {
 
     pub fn vertex_buffer(&self) -> &wgpu::Buffer {
         &self.vertex_buffer
-    }
-
-    pub fn surface_config(&self) -> &wgpu::SurfaceConfiguration {
-        &self.config
     }
 
     pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
