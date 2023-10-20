@@ -44,6 +44,7 @@ pub struct TextSpec {
     pub color: [f32; 4],
     pub scale: f32,
     pub text: String,
+    pub bounds: (f32, f32),
 }
 
 impl Default for TextSpec {
@@ -53,6 +54,7 @@ impl Default for TextSpec {
             color: [1.0, 1.0, 1.0, 1.0],
             scale: 16.0,
             text: String::from(""),
+            bounds: (0.0, 0.0),
         }
     }
 }
@@ -238,7 +240,7 @@ impl Renderer {
             Some(text_brush) => {
                 text_brush.queue(Section {
                     screen_position: text_spec.screen_position,
-                    bounds: (self.size.width as f32, self.size.height as f32),
+                    bounds: text_spec.bounds,
                     text: vec![Text::new(text_spec.text.as_str())
                         .with_color(text_spec.color)
                         .with_scale(text_spec.scale)],
@@ -276,5 +278,9 @@ impl Renderer {
 
     pub fn dpi_factor(&self) -> f64 {
         self.dpi_factor
+    }
+
+    pub fn size(&self) -> winit::dpi::PhysicalSize<u32> {
+        self.size
     }
 }

@@ -8,12 +8,14 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         Self {
-            text_view: TextView::new(),
+            text_view : TextView::new(),
             text_buffer: String::from(""),
         }
     }
 
     pub fn update(&mut self, renderer: &mut Renderer) {
+        self.text_view.set_width(renderer.size().width as f64);
+        self.text_view.set_height(renderer.size().height as f64);
         self.text_view.set_text(self.text_buffer.clone());
         self.text_view.render(renderer);
     }
