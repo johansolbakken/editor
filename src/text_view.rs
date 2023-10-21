@@ -1,5 +1,4 @@
-use crate::renderer::{Renderer, TextSpec, RectSpec};
-
+use crate::renderer::{RectSpec, Renderer, TextSpec};
 
 pub struct TextView {
     text: String,
@@ -29,7 +28,7 @@ impl TextView {
         let scale = self.font_size * renderer.dpi_factor();
         let screen_position = (self.x as f32, self.y as f32);
         let bounds = (self.width as f32, self.height as f32);
-        renderer.draw_text(TextSpec{
+        renderer.draw_text(TextSpec {
             text,
             scale: scale as f32,
             screen_position,
@@ -37,8 +36,19 @@ impl TextView {
             ..Default::default()
         });
 
+        let current_system_seconds = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs_f64();
+
+        let cursor_blink_rate = 0.2;
+        let cursor_blink_state = (current_system_seconds / cursor_blink_rate).sin() > 0.0;
+        if !cursor_blink_state {
+            return;
+        }
+
         // cursor
-        let cursor_x = self.x + self.cursor as f64 * self.font_size;
+        let cursor_x = self.x + renderer.text_width(&self.text[..self.cursor], scale as f32) as f64 - 9.0;
         let cursor_y = self.y;
         renderer.draw_text(TextSpec {
             text: String::from("|"),

@@ -1,6 +1,7 @@
 use glyph_brush::{Section, Text};
 use glyph_brush_layout::ab_glyph::FontArc;
 use wgpu::{util::DeviceExt, Backends, CommandEncoder, Instance, TextureView};
+use glyph_brush::GlyphCruncher;
 
 // lib.rs
 #[repr(C)]
@@ -389,5 +390,27 @@ impl Renderer {
 
     pub fn size(&self) -> winit::dpi::PhysicalSize<u32> {
         self.size
+    }
+
+    pub fn text_width(&mut self, text: &str, scale: f32) -> f32 {
+        if text.len() == 0 {
+            return 0.0;
+        }
+        match &mut self.text_brush {
+            Some(text_brush) => {
+                let section = Section {
+                    text: vec![Text::new(text).with_scale(scale)],
+                    bounds: (std::f32::MAX, std::f32::MAX),
+                    screen_position: (0.0, 0.0),
+                    ..Section::default()
+                };
+                let a = text_brush.glyph_bounds(section);
+                a.unwrap().width()
+            }
+            None => {
+                println!("[WARNING] No text brush set");
+                0.0
+            }
+        }
     }
 }
