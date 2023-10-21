@@ -1,30 +1,40 @@
+use std::collections::LinkedList;
+
 use crate::renderer::{RectSpec, Renderer, TextSpec};
 
 pub struct TextView {
-    text: String,
+    text: LinkedList<String>,
     font_size: f64,
     x: f64,
     y: f64,
     width: f64,
     height: f64,
     cursor: usize,
+    line: usize,
 }
 
 impl TextView {
     pub fn new() -> Self {
+        let mut text = LinkedList::new();
+        text.push_back(String::new());
         Self {
-            text: String::from(""),
+            text,
             font_size: 12.0,
             x: 0.0,
             y: 0.0,
             width: 0.0,
             height: 0.0,
             cursor: 0,
+            line: 0,
         }
     }
 
     pub fn render(&self, renderer: &mut Renderer) {
-        let text = self.text.clone();
+        let mut text = String::new();
+        for line in &self.text {
+            text.push_str(line);
+            text.push_str("\n");
+        }
         let scale = self.font_size * renderer.dpi_factor();
         let screen_position = (self.x as f32, self.y as f32);
         let bounds = (self.width as f32, self.height as f32);
@@ -48,7 +58,7 @@ impl TextView {
         }
 
         // cursor
-        let cursor_x = self.x + renderer.text_width(&self.text[..self.cursor], scale as f32) as f64 - 9.0;
+        let cursor_x = self.x + renderer.text_width(&self.text.iter().nth(self.line).unwrap()[..self.cursor], scale as f32) as f64 - 9.0;
         let cursor_y = self.y;
         renderer.draw_text(TextSpec {
             text: String::from("|"),
@@ -59,8 +69,10 @@ impl TextView {
         });
     }
 
-    pub fn set_text(&mut self, text: String) {
-        self.text = text;
+    pub fn insert_char(&mut self, c: char) {
+        let line = self.text.iter_mut().nth(self.line).unwrap();
+        line.insert(self.cursor, c);
+        self.cursor += 1;
     }
 
     pub fn set_x(&mut self, x: f64) {
@@ -89,5 +101,9 @@ impl TextView {
 
     pub fn cursor(&self) -> usize {
         self.cursor
+    }
+
+    pub fn cursor_up(&mut self) {
+        
     }
 }

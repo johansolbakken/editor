@@ -1,11 +1,13 @@
+use event::Key;
 use winit::{
-    event::{Event, WindowEvent},
+    event::{Event, VirtualKeyCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
 
-mod renderer;
 mod application;
+mod event;
+mod renderer;
 mod text_view;
 
 fn main() {
@@ -40,9 +42,35 @@ fn main() {
             Event::MainEventsCleared => {
                 window.request_redraw();
             }
-            Event::WindowEvent {  event: WindowEvent::ReceivedCharacter(char),.. } => {
+            Event::WindowEvent {
+                event: WindowEvent::ReceivedCharacter(char),
+                ..
+            } => {
                 app.character_event(char);
-            },
+            }
+            Event::WindowEvent {
+                event: WindowEvent::KeyboardInput { input, .. },
+                ..
+            } => {
+                let key = match input.virtual_keycode {
+                    Some(VirtualKeyCode::Right) => Some(Key::Right),
+                    Some(VirtualKeyCode::Left) => Some(Key::Left),
+                    Some(VirtualKeyCode::Up) => Some(Key::Up),
+                    Some(VirtualKeyCode::Down) => Some(Key::Down),
+                    _ => None,
+                };
+                match key {
+                    Some(key) => match input.state {
+                        winit::event::ElementState::Pressed => {
+                            app.key_event(event::KeyEvent::Pressed(key));
+                        }
+                        winit::event::ElementState::Released => {
+                            app.key_event(event::KeyEvent::Released(key));
+                        }
+                    },
+                    None => {}
+                }
+            }
             Event::RedrawRequested(window_id) if window_id == window.id() => {
                 let output = renderer.surface().get_current_texture().unwrap();
                 let view = output
