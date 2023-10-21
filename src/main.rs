@@ -57,6 +57,9 @@ fn main() {
                     Some(VirtualKeyCode::Left) => Some(Key::Left),
                     Some(VirtualKeyCode::Up) => Some(Key::Up),
                     Some(VirtualKeyCode::Down) => Some(Key::Down),
+
+                    Some(VirtualKeyCode::Back) => Some(Key::Backspace),
+                    Some(VirtualKeyCode::Return) => Some(Key::Enter),
                     _ => None,
                 };
                 match key {

@@ -58,7 +58,12 @@ impl TextView {
         }
 
         // cursor
-        let cursor_x = self.x + renderer.text_width(&self.text.iter().nth(self.line).unwrap()[..self.cursor], scale as f32) as f64 - 9.0;
+        let cursor_x = self.x
+            + renderer.text_width(
+                &self.text.iter().nth(self.line).unwrap()[..self.cursor],
+                scale as f32,
+            ) as f64
+            - 9.0;
         let cursor_y = self.y;
         renderer.draw_text(TextSpec {
             text: String::from("|"),
@@ -103,7 +108,12 @@ impl TextView {
         self.cursor
     }
 
-    pub fn cursor_up(&mut self) {
-        
-    }
+    pub fn move_cursor_left(&mut self) {}
+
+    pub fn move_cursor_right(&mut self) {}
+    pub fn move_cursor_up(&mut self) {}
+    pub fn move_cursor_down(&mut self) {}
+    pub fn delete_char(&mut self) {}
+
+    pub fn insert_enter(&mut self) {}
 }
