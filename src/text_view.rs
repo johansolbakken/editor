@@ -1,4 +1,4 @@
-use crate::renderer::{Renderer, TextSpec};
+use crate::renderer::{Renderer, TextSpec, RectSpec};
 
 
 pub struct TextView {
@@ -8,6 +8,7 @@ pub struct TextView {
     y: f64,
     width: f64,
     height: f64,
+    cursor: usize,
 }
 
 impl TextView {
@@ -19,6 +20,7 @@ impl TextView {
             y: 0.0,
             width: 0.0,
             height: 0.0,
+            cursor: 0,
         }
     }
 
@@ -31,6 +33,17 @@ impl TextView {
             text,
             scale: scale as f32,
             screen_position,
+            bounds,
+            ..Default::default()
+        });
+
+        // cursor
+        let cursor_x = self.x + self.cursor as f64 * self.font_size;
+        let cursor_y = self.y;
+        renderer.draw_text(TextSpec {
+            text: String::from("|"),
+            scale: scale as f32,
+            screen_position: (cursor_x as f32, cursor_y as f32),
             bounds,
             ..Default::default()
         });
@@ -58,5 +71,13 @@ impl TextView {
 
     pub fn set_font_size(&mut self, font_size: f64) {
         self.font_size = font_size;
+    }
+
+    pub fn set_cursor(&mut self, cursor: usize) {
+        self.cursor = cursor;
+    }
+
+    pub fn cursor(&self) -> usize {
+        self.cursor
     }
 }

@@ -24,5 +24,6 @@ impl App {
 
     pub fn character_event(&mut self, char: char) {
         self.text_buffer.push(char);
+        self.text_view.set_cursor(self.text_buffer.len());
     }
 }

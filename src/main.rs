@@ -83,6 +83,7 @@ fn main() {
                 // End render pass
                 renderer.flush_text(&view, size, &mut staging_belt, &mut encoder);
                 staging_belt.finish();
+                //renderer.flush_rects(&view,&mut encoder);
                 renderer.queue().submit(std::iter::once(encoder.finish()));
                 output.present();
             }
