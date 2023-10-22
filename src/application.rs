@@ -140,4 +140,9 @@ impl App {
             }
         }
     }
+
+    pub fn scroll_event(&mut self, delta_x: f64, delta_y: f64) {
+        self.text_view.scroll_horizontal(-delta_x);
+        self.text_view.scroll_vertical(-delta_y);
+    }
 }

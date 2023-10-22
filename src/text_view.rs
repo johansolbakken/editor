@@ -12,6 +12,8 @@ pub struct TextView {
     cursor: usize,
     line: usize,
     focused: bool,
+    scroll_x: f64,
+    scroll_y: f64,
 }
 
 impl TextView {
@@ -28,6 +30,8 @@ impl TextView {
             cursor: 0,
             line: 0,
             focused: false,
+            scroll_x: 0.0,
+            scroll_y: 0.0,
         }
     }
 
@@ -38,8 +42,8 @@ impl TextView {
             text.push_str("\n");
         }
         let scale = self.font_size * renderer.dpi_factor();
-        let screen_position = (self.x as f32, self.y as f32);
-        let bounds = (self.width as f32, self.height as f32);
+        let screen_position = (self.x as f32 - self.scroll_x as f32, self.y as f32 - self.scroll_y as f32);
+        let bounds = (f32::MAX, f32::MAX);
         renderer.draw_text(TextSpec {
             text,
             scale: scale as f32,
@@ -262,5 +266,19 @@ impl TextView {
             return false;
         }
         true
+    }
+
+    pub fn scroll_horizontal(&mut self, delta: f64) {
+        self.scroll_x += delta;
+        if self.scroll_x < 0.0 {
+            self.scroll_x = 0.0;
+        }
+    }
+
+    pub fn scroll_vertical(&mut self, delta: f64) {
+        self.scroll_y += delta;
+        if self.scroll_y < 0.0 {
+            self.scroll_y = 0.0;
+        }
     }
 }

@@ -105,6 +105,16 @@ fn main() {
                     None => {}
                 }
             }
+            Event::WindowEvent {
+                event: WindowEvent::MouseWheel { delta, .. },
+                ..
+            } => {
+                let (x, y) = match delta {
+                    winit::event::MouseScrollDelta::LineDelta(x, y) => (x as f64, y as f64),
+                    winit::event::MouseScrollDelta::PixelDelta(pos) => (pos.x as f64, pos.y as f64),
+                };
+                app.scroll_event(x, y);
+            }
             Event::RedrawRequested(window_id) if window_id == window.id() => {
                 let output = renderer.surface().get_current_texture().unwrap();
                 let view = output
