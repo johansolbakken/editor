@@ -7,6 +7,7 @@ TextInput::TextInput()
 
 void TextInput::render()
 {
+	if (!m_visible) return;
 	BeginScissorMode(static_cast<int>(m_x), static_cast<int>(m_y), static_cast<int>(m_width), static_cast<int>(m_height));
 
 	auto background_color = DARKGRAY;
@@ -20,6 +21,17 @@ void TextInput::render()
 	float text_y = m_y + m_height / 2 - font_height / 2;
 
 	DrawTextEx(GetFontDefault(), m_text.c_str(), {text_x - m_scroll_x, text_y}, font_height, font_spacing, WHITE);
+
+	float rate = 0.2f;
+	float state = static_cast<float>(GetTime()) / rate;
+	if (!m_focused || sin(state) > 0) {
+		EndScissorMode();
+		return;
+	}
+
+	// cursor as "|"
+	float cursor_x = MeasureTextEx(GetFontDefault(), m_text.substr(0,m_cursor).c_str(), font_height, font_spacing).x;
+	DrawTextEx(GetFontDefault(), "|", {text_x + cursor_x + 1 - m_scroll_x, text_y}, font_height, font_spacing, BLUE);
 
 	EndScissorMode();
 }

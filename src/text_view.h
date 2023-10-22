@@ -25,6 +25,7 @@ public:
 	void move_cursor_down();
 
 	void set_focused(bool focused) { m_focused = focused; }
+	bool focused() const { return m_focused; }
 
 	void scroll_horizontal(float delta) { m_scroll_x += delta; }
 	void scroll_vertical(float delta) { m_scroll_y += delta; }

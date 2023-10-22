@@ -21,6 +21,10 @@ public:
 	void move_cursor_right();
 
 	void set_focused(bool focused) { m_focused = focused; }
+	bool focused() const { return m_focused; }
+
+	void set_visible(bool visible) { m_visible = visible; }
+	bool visible() const { return m_visible; }
 
 	void scroll_horizontal(float delta) { m_scroll_x += delta; }
 
@@ -38,6 +42,7 @@ private:
 	int m_cursor = 0;
 	float m_scroll_x = 0;
 	bool m_focused = false;
+	bool m_visible = false;
 
 	std::string m_text;
 };
