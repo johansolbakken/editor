@@ -3,30 +3,36 @@
 #include <vector>
 #include <string>
 
-#include <raylib.h>
-
 class TextView {
 public:
     TextView();
-    void render(Font font);
+    void render();
     void update();
 
     [[nodiscard]] std::string text() const;
     void set_width(float width) { m_width = width; }
     void set_height(float height) { m_height = height; }
+
 	void insert_char(wchar_t c);
+	void insert_enter();
+	void delete_left_char();
+
+	void move_cursor_left();
+	void move_cursor_right();
+	void move_cursor_up();
+	void move_cursor_down();
+
 
 /*
-    pub fn insert_char(&mut self, c: char);
     pub fn move_cursor_left(&mut self);
     pub fn move_cursor_right(&mut self);
     pub fn move_cursor_up(&mut self);
     pub fn move_cursor_down(&mut self);
-    pub fn delete_char(&mut self);
-    pub fn insert_enter(&mut self);
+
     pub fn text(&self) -> String;
     pub fn set_text(&mut self, text: String);
     pub fn set_focused(&mut self, focused: bool);
+
     pub fn scroll_horizontal(&mut self, delta: f64);
     pub fn scroll_vertical(&mut self, delta: f64);
     */
