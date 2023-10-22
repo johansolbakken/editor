@@ -10,8 +10,8 @@ void App::run() {
     InitWindow(800, 600, "Hello World");
 
     TextView text_view;
-    text_view.width = 800;
-    text_view.height = 600;
+    text_view.set_width(800);
+    text_view.set_height(600);
 
     while (!WindowShouldClose()) {
         BeginDrawing();
