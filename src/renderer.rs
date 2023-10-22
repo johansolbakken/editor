@@ -1,7 +1,7 @@
+use glyph_brush::GlyphCruncher;
 use glyph_brush::{Section, Text};
 use glyph_brush_layout::ab_glyph::FontArc;
 use wgpu::{Backends, CommandEncoder, Instance, TextureView};
-use glyph_brush::GlyphCruncher;
 
 // lib.rs
 #[repr(C)]
@@ -37,6 +37,7 @@ pub struct Renderer {
     text_brush: Option<wgpu_glyph::GlyphBrush<()>>,
     font: Option<FontArc>,
     dpi_factor: f64,
+    staging_belt: wgpu::util::StagingBelt,
 }
 
 #[derive(Debug)]
@@ -180,6 +181,8 @@ impl Renderer {
 
         let dpi_factor = window.scale_factor();
 
+        let staging_belt = wgpu::util::StagingBelt::new(1024);
+
         Self {
             instance,
             surface,
@@ -193,6 +196,7 @@ impl Renderer {
             text_brush: None,
             dpi_factor,
             font: None,
+            staging_belt,
         }
     }
 
@@ -225,6 +229,8 @@ impl Renderer {
         // resize the text brush
         self.text_brush = None;
         self.init_font(self.font.clone().unwrap());
+
+        self.staging_belt = wgpu::util::StagingBelt::new(1024);
     }
 
     pub fn init_font(&mut self, font: FontArc) {
@@ -256,7 +262,6 @@ impl Renderer {
         &mut self,
         view: &TextureView,
         size: winit::dpi::PhysicalSize<u32>,
-        mut staging_belt: &mut wgpu::util::StagingBelt,
         mut encoder: &mut CommandEncoder,
     ) {
         match &mut self.text_brush {
@@ -264,7 +269,7 @@ impl Renderer {
                 text_brush
                     .draw_queued(
                         &self.device,
-                        &mut staging_belt,
+                        &mut self.staging_belt,
                         &mut encoder,
                         &view,
                         size.width,
@@ -276,6 +281,8 @@ impl Renderer {
                 println!("[WARNING] No text brush set");
             }
         }
+
+        self.staging_belt.finish();
     }
 
     pub fn dpi_factor(&self) -> f64 {

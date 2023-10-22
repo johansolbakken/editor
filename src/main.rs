@@ -23,8 +23,6 @@ fn main() {
     let mut renderer = renderer::Renderer::new(&window);
     let size = window.inner_size();
 
-    let mut staging_belt = wgpu::util::StagingBelt::new(1024);
-
     let cascadia: &[u8] = include_bytes!("font/Cascadia.ttf");
     let font = wgpu_glyph::ab_glyph::FontArc::try_from_slice(cascadia).unwrap();
     renderer.init_font(font.clone());
@@ -153,8 +151,8 @@ fn main() {
                 window.set_title(format!("Text Editor - {}", current_file).as_str());
 
                 // End render pass
-                renderer.flush_text(&view, size, &mut staging_belt, &mut encoder);
-                staging_belt.finish();
+                renderer.flush_text(&view, size, &mut encoder);
+                
                 //renderer.flush_rects(&view,&mut encoder);
                 renderer.queue().submit(std::iter::once(encoder.finish()));
                 output.present();

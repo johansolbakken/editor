@@ -13,7 +13,7 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         let mut text_view = TextView::new();
-        text_view.set_font_size(24.0);
+        text_view.set_font_size(15.0);
         Self { text_view, super_pressed: false, current_file: String::new() }
     }
 
