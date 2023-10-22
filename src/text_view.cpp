@@ -19,15 +19,14 @@ void TextView::render()
 	float x = 0;
 	float y = 0;
 	for (const auto& line : m_text) {
-		DrawTextEx(GetFontDefault(), line.c_str(), {m_x + x, m_y + y}, font_height, font_spacing, WHITE);
+		DrawTextEx(GetFontDefault(), line.c_str(), {m_x + x - m_scroll_x, m_y + y - m_scroll_y}, font_height, font_spacing, WHITE);
 		y += font_height + line_spacing;
 	}
-
 
 	// cursor as "|"
 	float cursor_x = MeasureTextEx(GetFontDefault(), m_text[m_line].substr(0,m_cursor).c_str(), font_height, font_spacing).x;
 	float cursor_y = m_line * (font_height + line_spacing);
-	DrawTextEx(GetFontDefault(), "|", {m_x + cursor_x + 1, m_y + cursor_y}, font_height, font_spacing, BLUE);
+	DrawTextEx(GetFontDefault(), "|", {m_x + cursor_x + 1 - m_scroll_x, m_y + cursor_y - m_scroll_y}, font_height, font_spacing, BLUE);
 
     // end scissors
     EndScissorMode();

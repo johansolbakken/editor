@@ -2,14 +2,11 @@
 
 #include <raylib.h>
 
-
 void App::input()
 {
-	if (IsKeyDown(KEY_LEFT_SUPER) || IsKeyDown(KEY_RIGHT_CONTROL)) {
-		if (IsKeyPressed(KEY_Q)) {
-			m_running = false;
-			return;
-		}
+	if (WindowShouldClose() && !IsKeyPressed(KEY_ESCAPE)) {
+		m_running = false;
+		return;
 	}
 
 	int unicode = GetCharPressed();
@@ -24,6 +21,14 @@ void App::input()
 
 	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(GetMousePosition(), m_text_view.bounds())) m_text_view.set_focused(true);
 	if (IsKeyPressed(KEY_ESCAPE)) m_text_view.set_focused(false);
+
+	float scroll_speed = 4;
+	auto mouse_scroll = GetMouseWheelMoveV();
+	m_text_view.scroll_vertical(-mouse_scroll.y * scroll_speed);
+	m_text_view.scroll_horizontal(-mouse_scroll.x * scroll_speed);
+
+	m_text_view.set_width(GetScreenWidth());
+	m_text_view.set_height(GetScreenHeight());
 }
 
 void App::run() {
