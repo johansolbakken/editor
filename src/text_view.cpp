@@ -50,12 +50,14 @@ std::string TextView::text() const
 
 void TextView::insert_char(wchar_t c)
 {
+	if (!m_focused) return;
 	m_text[m_line].insert(m_cursor, 1, c);
 	m_cursor++;
 }
 
 void TextView::insert_enter()
 {
+	if (!m_focused) return;
 	if (m_line == m_text.size() - 1 && m_cursor == m_text[m_line].size()) {
 		m_text.emplace_back("");
 		m_line++;
@@ -81,6 +83,7 @@ void TextView::insert_enter()
 
 void TextView::delete_left_char()
 {
+	if (!m_focused) return;
 	if (m_line == 0 && m_cursor == 0) {
 		return;
 	}
@@ -114,6 +117,7 @@ void TextView::delete_left_char()
 
 void TextView::move_cursor_left()
 {
+	if (!m_focused) return;
 	if (m_cursor == 0) {
 		if (m_line == 0) {
 			return;
@@ -131,6 +135,7 @@ void TextView::move_cursor_left()
 
 void TextView::move_cursor_right()
 {
+	if (!m_focused) return;
 	if (m_cursor == m_text[m_line].size()) {
 		if (m_line == m_text.size() - 1) {
 			return;
@@ -148,6 +153,7 @@ void TextView::move_cursor_right()
 
 void TextView::move_cursor_up()
 {
+	if (!m_focused) return;
 	if (m_line == 0) {
 		return;
 	}
@@ -159,6 +165,7 @@ void TextView::move_cursor_up()
 
 void TextView::move_cursor_down()
 {
+	if (!m_focused) return;
 	if (m_line == m_text.size() - 1) {
 		return;
 	}

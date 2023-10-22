@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+#include <raylib.h>
+
 class TextView {
 public:
     TextView();
@@ -22,20 +24,12 @@ public:
 	void move_cursor_up();
 	void move_cursor_down();
 
+	void set_focused(bool focused) { m_focused = focused; }
 
-/*
-    pub fn move_cursor_left(&mut self);
-    pub fn move_cursor_right(&mut self);
-    pub fn move_cursor_up(&mut self);
-    pub fn move_cursor_down(&mut self);
+	void scroll_horizontal(float delta) { m_scroll_x += delta; }
+	void scroll_vertical(float delta) { m_scroll_y += delta; }
 
-    pub fn text(&self) -> String;
-    pub fn set_text(&mut self, text: String);
-    pub fn set_focused(&mut self, focused: bool);
-
-    pub fn scroll_horizontal(&mut self, delta: f64);
-    pub fn scroll_vertical(&mut self, delta: f64);
-    */
+	[[nodiscard]] Rectangle bounds() const { return {m_x, m_y, m_width, m_height}; }
 
 private:
     std::vector<std::string> m_text;
@@ -47,15 +41,8 @@ private:
     int m_cursor = 0;
     int m_line = 0;
 
-    /*s
-    x: 0.0,
-            y: 0.0,
-            width: 0.0,
-            height: 0.0,
-            cursor: 0,
-            line: 0,
-            focused: false,
-            scroll_x: 0.0,
-            scroll_y: 0.0,
-    */
+	bool m_focused = false;
+
+	float m_scroll_x = 0;
+	float m_scroll_y = 0;
 };
