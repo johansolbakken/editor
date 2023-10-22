@@ -3,6 +3,7 @@
 #include "text_view.h"
 #include "text_input.h"
 
+
 class App {
 public:
 	App();
@@ -11,11 +12,11 @@ public:
 	void update();
 	void render();
 
+	void parse_command();
 
+	void open_file(const std::string& file_path);
+	void save_file(const std::string& file_path);
 	void new_file();
-	void open_file();
-	void save_file();
-	void save_file_as();
 
 private:
 	bool m_running = true;

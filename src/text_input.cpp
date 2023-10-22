@@ -65,3 +65,13 @@ void TextInput::move_cursor_right()
 	m_cursor++;
 	if (m_cursor > m_text.size()) m_cursor = m_text.size();
 }
+
+std::string TextInput::text() const
+{
+	return m_text;
+}
+
+void TextInput::cursor_to_end()
+{
+	m_cursor = m_text.size();
+}

@@ -12,6 +12,8 @@ public:
     void update();
 
     [[nodiscard]] std::string text() const;
+	void set_text(const std::string& text);
+
     void set_width(float width) { m_width = width; }
     void set_height(float height) { m_height = height; }
 

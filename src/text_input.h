@@ -11,6 +11,8 @@ public:
 	void update();
 
 	[[nodiscard]] std::string text() const;
+	void set_text(const std::string& text) { m_text = text; }
+
 	void set_width(float width) { m_width = width; }
 	void set_height(float height) { m_height = height; }
 
@@ -19,6 +21,7 @@ public:
 
 	void move_cursor_left();
 	void move_cursor_right();
+	void cursor_to_end();
 
 	void set_focused(bool focused) { m_focused = focused; }
 	bool focused() const { return m_focused; }

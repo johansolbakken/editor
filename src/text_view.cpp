@@ -67,25 +67,21 @@ void TextView::insert_char(wchar_t c)
 void TextView::insert_enter()
 {
 	if (!m_focused) return;
-	if (m_line == m_text.size() - 1 && m_cursor == m_text[m_line].size()) {
-		m_text.emplace_back("");
-		m_line++;
-		m_cursor = 0;
-		return;
-	}
-
 	std::string new_line;
-	std::string new_line2;
 	for (int i = 0; i < m_text[m_line].size(); i++) {
-		if (i < m_cursor) {
-			new_line.push_back(m_text[m_line][i]);
-		} else {
-			new_line2.push_back(m_text[m_line][i]);
+		if (i == m_cursor) {
+			break;
 		}
+		new_line.push_back(m_text[m_line][i]);
 	}
-
 	m_text[m_line] = new_line;
-	m_text.emplace_back(new_line2);
+
+	new_line.clear();
+	for (int i = m_cursor; i < m_text[m_line].size(); i++) {
+		new_line.push_back(m_text[m_line][i]);
+	}
+	m_text.insert(m_text.begin() + m_line + 1, new_line);
+
 	m_line++;
 	m_cursor = 0;
 }
@@ -182,4 +178,19 @@ void TextView::move_cursor_down()
 	if (m_cursor > m_text[m_line].size()) {
 		m_cursor = m_text[m_line].size();
 	}
+}
+
+void TextView::set_text(const std::string& text)
+{
+	std::vector<std::string> lines;
+	std::string line;
+	for (const auto& c : text) {
+		if (c == '\n') {
+			lines.emplace_back(line);
+			line.clear();
+			continue;
+		}
+		line.push_back(c);
+	}
+	m_text = lines;
 }
