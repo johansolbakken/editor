@@ -123,7 +123,7 @@ impl App {
         let mut file = String::new();
         std::io::stdin().read_line(&mut file).unwrap();
 
-        self.current_file = file;
+        self.current_file = file.trim().to_string();
     }
 
     pub fn get_current_file(&self) -> String {
