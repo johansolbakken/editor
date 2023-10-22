@@ -36,11 +36,7 @@ impl TextView {
     }
 
     pub fn render(&self, renderer: &mut Renderer) {
-        let mut text = String::new();
-        for line in &self.text {
-            text.push_str(line);
-            text.push_str("\n");
-        }
+        let text = self.text();
         let scale = self.font_size * renderer.dpi_factor();
         let screen_position = (self.x as f32 - self.scroll_x as f32, self.y as f32 - self.scroll_y as f32);
         let bounds = (f32::MAX, f32::MAX);
@@ -70,7 +66,8 @@ impl TextView {
                 text,
                 scale as f32,
             ) as f64
-            - 9.0;
+            - self.scroll_x
+            - renderer.text_width("|", scale as f32) as f64 / 2.0;
         let cursor_y = self.y + self.line as f64 * scale;
         renderer.draw_text(TextSpec {
             text: String::from("|"),
@@ -280,5 +277,17 @@ impl TextView {
         if self.scroll_y < 0.0 {
             self.scroll_y = 0.0;
         }
+    }
+
+    pub fn font_size(&self) -> f64 {
+        self.font_size
+    }
+
+    pub fn set_x(&mut self, x: f64) {
+        self.x = x;
+    }
+
+    pub fn set_y(&mut self, y: f64) {
+        self.y = y;
     }
 }

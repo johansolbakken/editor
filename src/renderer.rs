@@ -1,6 +1,5 @@
 use glyph_brush::GlyphCruncher;
 use glyph_brush::{Section, Text};
-use glyph_brush_layout::ab_glyph::FontArc;
 use wgpu::{Backends, CommandEncoder, Instance, TextureView};
 
 // lib.rs
@@ -35,7 +34,7 @@ pub struct Renderer {
     size: winit::dpi::PhysicalSize<u32>,
     render_pipeline: wgpu::RenderPipeline,
     text_brush: Option<wgpu_glyph::GlyphBrush<()>>,
-    font: Option<FontArc>,
+    font: String,
     dpi_factor: f64,
     staging_belt: wgpu::util::StagingBelt,
 }
@@ -57,26 +56,6 @@ impl Default for TextSpec {
             scale: 16.0,
             text: String::from(""),
             bounds: (0.0, 0.0),
-        }
-    }
-}
-
-pub struct RectSpec {
-    pub x: f64,
-    pub y: f64,
-    pub width: f64,
-    pub height: f64,
-    pub color: [f32; 4],
-}
-
-impl Default for RectSpec {
-    fn default() -> Self {
-        Self {
-            x: 0.0,
-            y: 0.0,
-            width: 0.0,
-            height: 0.0,
-            color: [1.0, 1.0, 1.0, 1.0],
         }
     }
 }
@@ -195,7 +174,7 @@ impl Renderer {
             render_pipeline,
             text_brush: None,
             dpi_factor,
-            font: None,
+            font: String::from(""),
             staging_belt,
         }
     }
@@ -228,13 +207,14 @@ impl Renderer {
 
         // resize the text brush
         self.text_brush = None;
-        self.init_font(self.font.clone().unwrap());
+        self.init_font();
 
         self.staging_belt = wgpu::util::StagingBelt::new(1024);
     }
 
-    pub fn init_font(&mut self, font: FontArc) {
-        self.font = Some(font.clone());
+    pub fn init_font(&mut self) {
+        const CASCADIA: &[u8] = include_bytes!("font/Cascadia.ttf");
+        let font = wgpu_glyph::ab_glyph::FontArc::try_from_slice(CASCADIA).unwrap();
         let glyph_brush = wgpu_glyph::GlyphBrushBuilder::using_font(font)
             .build(&self.device, self.surface_format);
         self.text_brush = Some(glyph_brush);

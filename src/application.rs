@@ -39,6 +39,15 @@ impl App {
                 'o' => {
                     self.open();
                 }
+                '+' => {
+                    self.text_view.set_font_size(self.text_view.font_size() + 1.0);
+                }
+                '-' => {
+                    self.text_view.set_font_size(self.text_view.font_size() - 1.0);
+                }
+                '0' => {
+                    self.text_view.set_font_size(15.0);
+                }
                 _ => {}
             }
             return;

@@ -17,15 +17,14 @@ fn main() {
     // Create a window
     let window = WindowBuilder::new()
         .with_title("WGPU Text Editor")
+        .with_inner_size(winit::dpi::LogicalSize::new(1024, 768))
         .build(&event_loop)
         .unwrap();
 
     let mut renderer = renderer::Renderer::new(&window);
     let size = window.inner_size();
 
-    let cascadia: &[u8] = include_bytes!("font/Cascadia.ttf");
-    let font = wgpu_glyph::ab_glyph::FontArc::try_from_slice(cascadia).unwrap();
-    renderer.init_font(font.clone());
+    renderer.init_font();
 
     let mut app = application::App::new();
 
@@ -160,7 +159,9 @@ fn main() {
             Event::WindowEvent {
                 event: WindowEvent::Resized(new_size),
                 ..
-            } => renderer.resize(new_size),
+            } => {
+                renderer.resize(new_size);
+            },
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
                 ..
