@@ -49,10 +49,13 @@ void TextView::update()
 std::string TextView::text() const
 {
     std::string joined_text;
+	int i = 0;
     for (const auto& line : m_text)
     {
         joined_text += line;
-		joined_text += "\n";
+
+		if (i < m_text.size() - 1) joined_text += "\n";
+		i++;
     }
     return joined_text;
 }
@@ -67,21 +70,34 @@ void TextView::insert_char(wchar_t c)
 void TextView::insert_enter()
 {
 	if (!m_focused) return;
+
+	if (m_line == m_text.size() - 1) {
+		m_text.emplace_back("");
+		m_line++;
+		m_cursor = 0;
+		return;
+	}
+
+	if (m_cursor == m_text[m_line].size()) {
+		m_text.emplace(m_text.begin() + m_line + 1, "");
+		m_line++;
+		m_cursor = 0;
+		return;
+	}
+
+	std::string before_cursor;
 	std::string new_line;
+
 	for (int i = 0; i < m_text[m_line].size(); i++) {
-		if (i == m_cursor) {
-			break;
+		if (i < m_cursor) {
+			before_cursor.push_back(m_text[m_line][i]);
+		} else {
+			new_line.push_back(m_text[m_line][i]);
 		}
-		new_line.push_back(m_text[m_line][i]);
 	}
-	m_text[m_line] = new_line;
 
-	new_line.clear();
-	for (int i = m_cursor; i < m_text[m_line].size(); i++) {
-		new_line.push_back(m_text[m_line][i]);
-	}
-	m_text.insert(m_text.begin() + m_line + 1, new_line);
-
+	m_text[m_line] = before_cursor;
+	m_text.emplace(m_text.begin() + m_line + 1, new_line);
 	m_line++;
 	m_cursor = 0;
 }
@@ -95,6 +111,7 @@ void TextView::delete_left_char()
 
 	if (m_cursor == 0) {
 		std::string new_line;
+		int cursor_pos = m_text[m_line - 1].size();
 		for (int i = 0; i < m_text[m_line - 1].size(); i++) {
 			new_line.push_back(m_text[m_line - 1][i]);
 		}
@@ -104,7 +121,7 @@ void TextView::delete_left_char()
 		m_text[m_line - 1] = new_line;
 		m_text.erase(m_text.begin() + m_line);
 		m_line--;
-		m_cursor = m_text[m_line].size();
+		m_cursor = cursor_pos;
 		return;
 	}
 
