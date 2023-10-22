@@ -1,11 +1,16 @@
 #pragma once
 
 #include "text_view.h"
+#include "text_input.h"
 
 class App {
 public:
+	App();
+	void run();
 	void input();
-    void run();
+	void update();
+	void render();
+
 
 	void new_file();
 	void open_file();
@@ -15,4 +20,6 @@ public:
 private:
 	bool m_running = true;
 	TextView m_text_view;
+	TextInput m_text_input;
+	std::string m_file_path;
 };

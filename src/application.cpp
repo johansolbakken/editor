@@ -2,6 +2,31 @@
 
 #include <raylib.h>
 
+App::App()
+{
+	m_text_view.set_width(800);
+	m_text_view.set_height(600);
+
+	m_text_input.set_width(600);
+	m_text_input.set_height(40);
+	m_text_input.set_x(GetScreenWidth() / 2 - m_text_input.bounds().width / 2);
+	m_text_input.set_y(40);
+}
+
+void App::run() {
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+
+    InitWindow(800, 600, "Hello World");
+
+    while (m_running) {
+		input();
+		update();
+		render();
+    }
+
+    CloseWindow();
+}
+
 void App::input()
 {
 	if (WindowShouldClose() && !IsKeyPressed(KEY_ESCAPE)) {
@@ -10,7 +35,8 @@ void App::input()
 	}
 
 	int unicode = GetCharPressed();
-	if (unicode > 0) m_text_view.insert_char(unicode);
+	//if (unicode > 0) m_text_view.insert_char(unicode);
+	if (unicode > 0) m_text_input.insert_char(unicode);
 	if (IsKeyPressed(KEY_ENTER)) m_text_view.insert_enter();
 	if (IsKeyPressed(KEY_BACKSPACE)) m_text_view.delete_left_char();
 
@@ -26,28 +52,29 @@ void App::input()
 	auto mouse_scroll = GetMouseWheelMoveV();
 	m_text_view.scroll_vertical(-mouse_scroll.y * scroll_speed);
 	m_text_view.scroll_horizontal(-mouse_scroll.x * scroll_speed);
+	m_text_input.scroll_horizontal(-mouse_scroll.x * scroll_speed);
 
 	m_text_view.set_width(GetScreenWidth());
 	m_text_view.set_height(GetScreenHeight());
 }
 
-void App::run() {
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-
-    InitWindow(800, 600, "Hello World");
-
-    m_text_view.set_width(800);
-    m_text_view.set_height(600);
-
-    while (m_running) {
-		input();
-        BeginDrawing();
-        ClearBackground((Color){0,0,0,255});
-        m_text_view.render();
-        EndDrawing();
-    }
-    CloseWindow();
+void App::update()
+{
+	m_text_view.update();
+	m_text_input.update();
+	m_text_input.set_x(GetScreenWidth() / 2 - m_text_input.bounds().width / 2);
 }
+
+void App::render()
+{
+	BeginDrawing();
+	ClearBackground((Color){0,0,0,255});
+	m_text_view.render();
+	m_text_input.render();
+	EndDrawing();
+}
+
+
 
 void App::new_file()
 {
@@ -68,3 +95,5 @@ void App::save_file_as()
 {
 
 }
+
+
