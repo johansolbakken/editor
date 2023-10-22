@@ -47,6 +47,7 @@ void App::input()
 			m_text_input.set_visible(true);
 			m_text_input.set_focused(true);
 			m_text_input.set_text("");
+			m_text_input.cursor_to_end();
 		}
 		if (IsKeyPressed(KEY_S))
 		{
