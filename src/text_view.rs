@@ -71,7 +71,7 @@ impl TextView {
                 scale as f32,
             ) as f64
             - 9.0;
-        let cursor_y = self.y + self.line as f64 * self.font_size * 2.0;
+        let cursor_y = self.y + self.line as f64 * scale;
         renderer.draw_text(TextSpec {
             text: String::from("|"),
             scale: scale as f32,

@@ -28,9 +28,6 @@ fn main() {
     let cascadia: &[u8] = include_bytes!("font/Cascadia.ttf");
     let font = wgpu_glyph::ab_glyph::FontArc::try_from_slice(cascadia).unwrap();
     renderer.init_font(font.clone());
-    let glyph_brush = wgpu_glyph::GlyphBrushBuilder::using_font(font)
-        .build(renderer.device(), renderer.surface_format());
-    renderer.set_text_brush(glyph_brush);
 
     let mut app = application::App::new();
 

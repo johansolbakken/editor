@@ -1,6 +1,6 @@
 use glyph_brush::{Section, Text};
 use glyph_brush_layout::ab_glyph::FontArc;
-use wgpu::{util::DeviceExt, Backends, CommandEncoder, Instance, TextureView};
+use wgpu::{Backends, CommandEncoder, Instance, TextureView};
 use glyph_brush::GlyphCruncher;
 
 // lib.rs
@@ -34,13 +34,9 @@ pub struct Renderer {
     queue: wgpu::Queue,
     size: winit::dpi::PhysicalSize<u32>,
     render_pipeline: wgpu::RenderPipeline,
-    vertex_buffer: wgpu::Buffer,
-    rect_vertex_buffer: wgpu::Buffer,
-    rect_index_buffer: wgpu::Buffer,
     text_brush: Option<wgpu_glyph::GlyphBrush<()>>,
+    font: Option<FontArc>,
     dpi_factor: f64,
-    rect_specs: Vec<RectSpec>,
-    rect_pipeline: wgpu::RenderPipeline,
 }
 
 #[derive(Debug)]
@@ -182,102 +178,7 @@ impl Renderer {
             multiview: None, // 5.
         });
 
-        // lib.rs
-        const VERTEX_DATA: &[Vertex] = &[
-            Vertex {
-                position: [-0.5, -0.5, 0.0],
-            },
-            Vertex {
-                position: [0.5, -0.5, 0.0],
-            },
-            Vertex {
-                position: [0.0, 0.5, 0.0],
-            },
-        ];
-
-        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Vertex Buffer"),
-            contents: bytemuck::cast_slice(VERTEX_DATA),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
-
-        let rect_vertices = [
-            Vertex {
-                position: [-0.5, -0.5, 0.0],
-            },
-            Vertex {
-                position: [0.5, -0.5, 0.0],
-            },
-            Vertex {
-                position: [0.5, 0.5, 0.0],
-            },
-            Vertex {
-                position: [-0.5, 0.5, 0.0],
-            },
-        ];
-
-        let rect_vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Rect Vertex Buffer"),
-            contents: bytemuck::cast_slice(&rect_vertices),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
-
-        let rect_indices = &[0u16, 1, 2, 2, 3, 0];
-
-        let rect_index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Rect Index Buffer"),
-            contents: bytemuck::cast_slice(rect_indices),
-            usage: wgpu::BufferUsages::INDEX,
-        });
-
         let dpi_factor = window.scale_factor();
-
-        let rect_shader = device.create_shader_module(wgpu::include_wgsl!("rect_shader.wgsl"));
-
-        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("Bind Group Layout"),
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
-                },
-            ],
-        });
-
-        let rect_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("Rect Pipeline Layout"),
-            bind_group_layouts: &[&bind_group_layout],
-            push_constant_ranges: &[],
-        });
-
-        let rect_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("Rect Pipeline"),
-            layout: Some(&rect_pipeline_layout),
-            vertex: wgpu::VertexState {
-                module: &rect_shader,
-                entry_point: "vs_main",
-                buffers: &[Vertex::desc()],
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &rect_shader,
-                entry_point: "fs_main",
-                targets: &[Some(wgpu::ColorTargetState {
-                    format: config.format,
-                    blend: Some(wgpu::BlendState::REPLACE),
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-            }),
-            primitive: wgpu::PrimitiveState::default(),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-            multiview: None,
-        });        
 
         Self {
             instance,
@@ -289,13 +190,9 @@ impl Renderer {
             queue,
             size,
             render_pipeline,
-            vertex_buffer,
             text_brush: None,
             dpi_factor,
-            rect_vertex_buffer,
-            rect_index_buffer,
-            rect_specs: Vec::new(),
-            rect_pipeline,
+            font: None,
         }
     }
 
@@ -305,10 +202,6 @@ impl Renderer {
 
     pub fn queue(&self) -> &wgpu::Queue {
         &self.queue
-    }
-
-    pub fn surface_format(&self) -> wgpu::TextureFormat {
-        self.surface_format
     }
 
     pub fn surface(&self) -> &wgpu::Surface {
@@ -328,9 +221,14 @@ impl Renderer {
         };
         self.surface.configure(&self.device, &self.config);
         self.config = config;
+
+        // resize the text brush
+        self.text_brush = None;
+        self.init_font(self.font.clone().unwrap());
     }
 
     pub fn init_font(&mut self, font: FontArc) {
+        self.font = Some(font.clone());
         let glyph_brush = wgpu_glyph::GlyphBrushBuilder::using_font(font)
             .build(&self.device, self.surface_format);
         self.text_brush = Some(glyph_brush);
@@ -352,10 +250,6 @@ impl Renderer {
                 println!("[WARNING] No text brush set");
             }
         }
-    }
-
-    pub fn set_text_brush(&mut self, text_brush: wgpu_glyph::GlyphBrush<()>) {
-        self.text_brush = Some(text_brush);
     }
 
     pub fn flush_text(
