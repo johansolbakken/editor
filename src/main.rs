@@ -60,6 +60,11 @@ fn main() {
 
                     Some(VirtualKeyCode::Back) => Some(Key::Backspace),
                     Some(VirtualKeyCode::Return) => Some(Key::Enter),
+
+                    Some(VirtualKeyCode::LShift) | Some(VirtualKeyCode::RShift) => Some(Key::Shift),
+                    Some(VirtualKeyCode::LControl) | Some(VirtualKeyCode::RControl) => { Some(Key::Ctrl) }
+                    Some(VirtualKeyCode::LAlt) | Some(VirtualKeyCode::RAlt) => Some(Key::Alt),
+                    Some(VirtualKeyCode::LWin) | Some(VirtualKeyCode::RWin) => Some(Key::Super),
                     _ => None,
                 };
                 match key {
@@ -110,6 +115,9 @@ fn main() {
                 }
 
                 app.update(&mut renderer);
+
+                let current_file = app.get_current_file();
+                window.set_title(format!("Text Editor - {}", current_file).as_str());
 
                 // End render pass
                 renderer.flush_text(&view, size, &mut staging_belt, &mut encoder);

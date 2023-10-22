@@ -199,4 +199,25 @@ impl TextView {
         self.line += 1;
         self.cursor = 0;
     }
+
+    pub fn text(&self) -> String {
+        let mut text = String::new();
+        for (i,line) in self.text.iter().enumerate() {
+            text.push_str(line);
+            if i != self.text.len() - 1 {
+                text.push_str("\n");
+            }
+        }
+        text
+    }
+
+    pub fn set_text(&mut self, text: String) {
+        self.text = LinkedList::new();
+        let lines = text.split("\n");
+        for line in lines {
+            self.text.push_back(String::from(line));
+        }
+        self.line = 0;
+        self.cursor = 0;
+    }
 }
