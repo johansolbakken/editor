@@ -10,7 +10,7 @@ void TextInput::render()
 	if (!m_visible) return;
 	BeginScissorMode(static_cast<int>(m_x), static_cast<int>(m_y), static_cast<int>(m_width), static_cast<int>(m_height));
 
-	auto background_color = DARKGRAY;
+	auto background_color = (Color){25,25,25,255};
 	DrawRectangleRounded({m_x, m_y, m_width, m_height}, 0.4f, 0, background_color);
 
 	float font_height = 20;
@@ -31,7 +31,7 @@ void TextInput::render()
 
 	// cursor as "|"
 	float cursor_x = MeasureTextEx(GetFontDefault(), m_text.substr(0,m_cursor).c_str(), font_height, font_spacing).x;
-	DrawTextEx(GetFontDefault(), "|", {text_x + cursor_x + 1 - m_scroll_x, text_y}, font_height, font_spacing, BLUE);
+	DrawTextEx(GetFontDefault(), "|", {text_x + cursor_x + 1 - m_scroll_x, text_y}, font_height, font_spacing, GRAY);
 
 	EndScissorMode();
 }
