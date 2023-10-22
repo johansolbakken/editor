@@ -3,14 +3,18 @@
 #include <vector>
 #include <string>
 
+#include <raylib.h>
+
 class TextView {
 public:
-    void render();
+    TextView();
+    void render(Font font);
     void update();
 
-    std::string text() const;
+    [[nodiscard]] std::string text() const;
     void set_width(float width) { m_width = width; }
     void set_height(float height) { m_height = height; }
+	void insert_char(wchar_t c);
 
 /*
     pub fn insert_char(&mut self, c: char);
@@ -33,6 +37,9 @@ private:
     float m_y = 0;
     float m_width = 0;
     float m_height = 0;
+
+    int m_cursor = 0;
+    int m_line = 0;
 
     /*s
     x: 0.0,
