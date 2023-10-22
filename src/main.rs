@@ -49,6 +49,31 @@ fn main() {
                 app.character_event(char);
             }
             Event::WindowEvent {
+                event: WindowEvent::MouseInput { state, button, .. },
+                ..
+            } => {
+                let pos = match button {
+                    winit::event::MouseButton::Left => {
+                        let pos = winit::dpi::PhysicalPosition::new(0.0, 0.0);
+                        let pos = pos.to_logical(window.scale_factor());
+                        pos
+                    }
+                    _ => {
+                        return;
+                    }
+                };
+                let pressed = match state {
+                    winit::event::ElementState::Pressed => {
+                        true
+                    }
+                    winit::event::ElementState::Released => {
+                        false
+                    }
+                };
+                app.mouse_event(pos.x, pos.y, pressed);
+            }
+
+            Event::WindowEvent {
                 event: WindowEvent::KeyboardInput { input, .. },
                 ..
             } => {
@@ -60,6 +85,7 @@ fn main() {
 
                     Some(VirtualKeyCode::Back) => Some(Key::Backspace),
                     Some(VirtualKeyCode::Return) => Some(Key::Enter),
+                    Some(VirtualKeyCode::Escape) => Some(Key::Escape),
 
                     Some(VirtualKeyCode::LShift) | Some(VirtualKeyCode::RShift) => Some(Key::Shift),
                     Some(VirtualKeyCode::LControl) | Some(VirtualKeyCode::RControl) => { Some(Key::Ctrl) }

@@ -101,6 +101,9 @@ impl App {
                 Key::Super => {
                     self.super_pressed = true;
                 }
+                Key::Escape => {
+                    self.text_view.set_focused(false);
+                }
                 _ => {}
             },
             KeyEvent::Released(key) => {
@@ -125,5 +128,16 @@ impl App {
 
     pub fn get_current_file(&self) -> String {
         self.current_file.clone()
+    }
+
+    pub fn mouse_event(&mut self, x: f64, y: f64, pressed: bool) {
+        if pressed {
+            if self.text_view.is_inside(x, y) {
+                self.text_view.set_focused(true);
+                // self.text_view.set_cursor(x, y);
+            } else {
+                self.text_view.set_focused(false);
+            }
+        }
     }
 }

@@ -11,6 +11,7 @@ pub struct TextView {
     height: f64,
     cursor: usize,
     line: usize,
+    focused: bool,
 }
 
 impl TextView {
@@ -26,6 +27,7 @@ impl TextView {
             height: 0.0,
             cursor: 0,
             line: 0,
+            focused: false,
         }
     }
 
@@ -53,7 +55,7 @@ impl TextView {
 
         let cursor_blink_rate = 0.2;
         let cursor_blink_state = (current_system_seconds / cursor_blink_rate).sin() > 0.0;
-        if !cursor_blink_state {
+        if !self.focused || !cursor_blink_state {
             return;
         }
 
@@ -76,6 +78,9 @@ impl TextView {
     }
 
     pub fn insert_char(&mut self, c: char) {
+        if !self.focused {
+            return;
+        }
         let line = self.text.iter_mut().nth(self.line).unwrap();
         line.insert(self.cursor, c);
         self.cursor += 1;
@@ -94,18 +99,27 @@ impl TextView {
     }
 
     pub fn move_cursor_left(&mut self) {
+        if !self.focused {
+            return;
+        }
         if self.cursor == 0 {
             return;
         }
         self.cursor -= 1;
     }
     pub fn move_cursor_right(&mut self) {
+        if !self.focused {
+            return;
+        }
         if self.cursor == self.text.iter().nth(self.line).unwrap().len() {
             return;
         }
         self.cursor += 1;
     }
     pub fn move_cursor_up(&mut self) {
+        if !self.focused {
+            return;
+        }
         if self.line == 0 {
             return;
         }
@@ -116,6 +130,9 @@ impl TextView {
     }
 
     pub fn move_cursor_down(&mut self) {
+        if !self.focused {
+            return;
+        }
         if self.line == self.text.len() - 1 {
             return;
         }
@@ -127,6 +144,9 @@ impl TextView {
     }
 
     pub fn delete_char(&mut self) {
+        if !self.focused {
+            return;
+        }
         if self.line == 0 && self.cursor == 0 {
             return;
         }
@@ -171,6 +191,9 @@ impl TextView {
     }
 
     pub fn insert_enter(&mut self) {
+        if !self.focused {
+            return;
+        }
         if self.line == self.text.len() - 1 && self.cursor == self.text.iter().nth(self.line).unwrap().len() {
             self.text.push_back(String::new());
             self.line += 1;
@@ -219,5 +242,25 @@ impl TextView {
         }
         self.line = 0;
         self.cursor = 0;
+    }
+
+    pub fn set_focused(&mut self, focused: bool) {
+        self.focused = focused;
+    }
+
+    pub fn is_inside(&self, x: f64, y: f64) -> bool {
+        if x < self.x {
+            return false;
+        }
+        if x > self.x + self.width {
+            return false;
+        }
+        if y < self.y {
+            return false;
+        }
+        if y > self.y + self.height {
+            return false;
+        }
+        true
     }
 }
