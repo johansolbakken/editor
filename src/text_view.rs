@@ -58,13 +58,14 @@ impl TextView {
         }
 
         // cursor
+        let text = &self.text.iter().nth(self.line).unwrap()[..self.cursor];
         let cursor_x = self.x
             + renderer.text_width(
-                &self.text.iter().nth(self.line).unwrap()[..self.cursor],
+                text,
                 scale as f32,
             ) as f64
             - 9.0;
-        let cursor_y = self.y;
+        let cursor_y = self.y + self.line as f64 * self.font_size * 2.0;
         renderer.draw_text(TextSpec {
             text: String::from("|"),
             scale: scale as f32,
@@ -108,12 +109,110 @@ impl TextView {
         self.cursor
     }
 
-    pub fn move_cursor_left(&mut self) {}
+    pub fn move_cursor_left(&mut self) {
+        if self.cursor == 0 {
+            return;
+        }
+        self.cursor -= 1;
+    }
+    pub fn move_cursor_right(&mut self) {
+        if self.cursor == self.text.iter().nth(self.line).unwrap().len() {
+            return;
+        }
+        self.cursor += 1;
+    }
+    pub fn move_cursor_up(&mut self) {
+        if self.line == 0 {
+            return;
+        }
+        self.line -= 1;
+        if self.cursor > self.text.iter().nth(self.line).unwrap().len() {
+            self.cursor = self.text.iter().nth(self.line).unwrap().len();
+        }
+    }
 
-    pub fn move_cursor_right(&mut self) {}
-    pub fn move_cursor_up(&mut self) {}
-    pub fn move_cursor_down(&mut self) {}
-    pub fn delete_char(&mut self) {}
+    pub fn move_cursor_down(&mut self) {
+        if self.line == self.text.len() - 1 {
+            return;
+        }
 
-    pub fn insert_enter(&mut self) {}
+        self.line += 1;
+        if self.cursor > self.text.iter().nth(self.line).unwrap().len() {
+            self.cursor = self.text.iter().nth(self.line).unwrap().len();
+        }
+    }
+
+    pub fn delete_char(&mut self) {
+        if self.line == 0 && self.cursor == 0 {
+            return;
+        }
+
+        if self.cursor == 0 {
+            let mut new_text: LinkedList<String> = LinkedList::new();
+            for (i, line) in self.text.iter().enumerate() {
+                if i == self.line - 1 {
+                    let mut new_line = String::new();
+                    new_line.push_str(line);
+                    new_line.push_str(&self.text.iter().nth(self.line).unwrap());
+                    new_text.push_back(new_line);
+                } else if i == self.line {
+                    continue;
+                } else {
+                    new_text.push_back(line.clone());
+                }
+            }
+            self.text = new_text;
+            self.line -= 1;
+            self.cursor = self.text.iter().nth(self.line).unwrap().len();
+            return;
+        }
+
+        let mut new_text: LinkedList<String> = LinkedList::new();
+        for (i, line) in self.text.iter().enumerate() {
+            if i == self.line {
+                let mut new_line = String::new();
+                for (j, c) in line.chars().enumerate() {
+                    if j == self.cursor - 1 {
+                        continue;
+                    }
+                    new_line.push(c);
+                }
+                new_text.push_back(new_line);
+            } else {
+                new_text.push_back(line.clone());
+            }
+        }
+        self.text = new_text;
+        self.cursor -= 1;
+    }
+
+    pub fn insert_enter(&mut self) {
+        if self.line == self.text.len() - 1 && self.cursor == self.text.iter().nth(self.line).unwrap().len() {
+            self.text.push_back(String::new());
+            self.line += 1;
+            self.cursor = 0;
+            return;
+        }
+        let mut new_text: LinkedList<String> = LinkedList::new();
+        for (i, line) in self.text.iter_mut().enumerate() {
+            if i == self.line {
+                let mut new_line = String::new();
+                let mut new_line2 = String::new();
+                for (j, c) in line.chars().enumerate() {
+                    if j < self.cursor {
+                        new_line.push(c);
+                    } else {
+                        new_line2.push(c);
+                    }
+                }
+                new_text.push_back(new_line);
+                new_text.push_back(new_line2);
+            } else {
+                new_text.push_back(line.clone());
+            }
+        }
+        self.text = new_text;
+        self.line += 1;
+        self.cursor = 0;
+    }
 }
