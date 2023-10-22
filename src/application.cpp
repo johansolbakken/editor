@@ -48,3 +48,23 @@ void App::run() {
     }
     CloseWindow();
 }
+
+void App::new_file()
+{
+
+}
+
+void App::open_file()
+{
+
+}
+
+void App::save_file()
+{
+
+}
+
+void App::save_file_as()
+{
+
+}
