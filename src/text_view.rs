@@ -1,6 +1,6 @@
 use std::collections::LinkedList;
 
-use crate::renderer::{RectSpec, Renderer, TextSpec};
+use crate::renderer::{Renderer, TextSpec};
 
 pub struct TextView {
     text: LinkedList<String>,
@@ -81,14 +81,6 @@ impl TextView {
         self.cursor += 1;
     }
 
-    pub fn set_x(&mut self, x: f64) {
-        self.x = x;
-    }
-
-    pub fn set_y(&mut self, y: f64) {
-        self.y = y;
-    }
-
     pub fn set_width(&mut self, width: f64) {
         self.width = width;
     }
@@ -99,14 +91,6 @@ impl TextView {
 
     pub fn set_font_size(&mut self, font_size: f64) {
         self.font_size = font_size;
-    }
-
-    pub fn set_cursor(&mut self, cursor: usize) {
-        self.cursor = cursor;
-    }
-
-    pub fn cursor(&self) -> usize {
-        self.cursor
     }
 
     pub fn move_cursor_left(&mut self) {
