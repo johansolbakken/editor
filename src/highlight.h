@@ -4,4 +4,10 @@
 
 #include <string>
 
-Color get_color_for_token(const std::string& token);
+struct Token
+{
+	std::string text;
+	Color color;
+};
+
+std::vector<std::vector<Token>> get_colors(const std::vector<std::string>& linesVector);
