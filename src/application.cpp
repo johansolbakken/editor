@@ -95,18 +95,18 @@ void App::input()
 		if (IsKeyPressed(KEY_ENTER)) m_text_view.insert_enter();
 		if (IsKeyPressed(KEY_BACKSPACE)) m_text_view.delete_left_char();
 
-		if (IsKeyPressed(KEY_LEFT)) m_text_view.move_cursor_left();
-		if (IsKeyPressed(KEY_RIGHT)) m_text_view.move_cursor_right();
-		if (IsKeyPressed(KEY_UP)) m_text_view.move_cursor_up();
-		if (IsKeyPressed(KEY_DOWN)) m_text_view.move_cursor_down();
+		if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) m_text_view.move_cursor_left();
+		if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) m_text_view.move_cursor_right();
+		if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP)) m_text_view.move_cursor_up();
+		if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN)) m_text_view.move_cursor_down();
 	}
 
 	if (m_text_input.focused())
 	{
 		if (IsKeyPressed(KEY_BACKSPACE)) m_text_input.delete_left_char();
 
-		if (IsKeyPressed(KEY_LEFT)) m_text_input.move_cursor_left();
-		if (IsKeyPressed(KEY_RIGHT)) m_text_input.move_cursor_right();
+		if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) m_text_input.move_cursor_left();
+		if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) m_text_input.move_cursor_right();
 
 		if (IsKeyPressed(KEY_ENTER)) parse_command();
 	}
