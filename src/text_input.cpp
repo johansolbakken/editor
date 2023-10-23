@@ -1,5 +1,7 @@
 #include "text_input.h"
 
+extern Font font;
+
 TextInput::TextInput()
 {
 
@@ -14,13 +16,13 @@ void TextInput::render()
 	DrawRectangleRounded({m_x, m_y, m_width, m_height}, 0.4f, 0, background_color);
 
 	float font_height = 20;
-	float font_spacing = 2;
+	float font_spacing = 1;
 
 	// center the text
 	float text_x = m_x + 8;
 	float text_y = m_y + m_height / 2 - font_height / 2;
 
-	DrawTextEx(GetFontDefault(), m_text.c_str(), {text_x - m_scroll_x, text_y}, font_height, font_spacing, WHITE);
+	DrawTextEx(font, m_text.c_str(), {text_x - m_scroll_x, text_y}, font_height, font_spacing, WHITE);
 
 	float rate = 0.2f;
 	float state = static_cast<float>(GetTime()) / rate;
@@ -30,8 +32,9 @@ void TextInput::render()
 	}
 
 	// cursor as "|"
-	float cursor_x = MeasureTextEx(GetFontDefault(), m_text.substr(0,m_cursor).c_str(), font_height, font_spacing).x;
-	DrawTextEx(GetFontDefault(), "|", {text_x + cursor_x + 1 - m_scroll_x, text_y}, font_height, font_spacing, GRAY);
+	float cursor_x = MeasureTextEx(font, m_text.substr(0,m_cursor).c_str(), font_height, font_spacing).x
+					- MeasureTextEx(font, "|", font_height, font_spacing).x / 2;
+	DrawTextEx(font, "|", {text_x + cursor_x - m_scroll_x, text_y}, font_height, font_spacing, GRAY);
 
 	EndScissorMode();
 }

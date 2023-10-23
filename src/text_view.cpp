@@ -2,6 +2,8 @@
 
 #include <raylib.h>
 
+extern Font font;
+
 TextView::TextView()
 {
 	m_text.emplace_back("");
@@ -13,7 +15,7 @@ TextView::TextView()
 void TextView::render()
 {
 	float font_height = 20;
-	float font_spacing = 2;
+	float font_spacing = 1;
 	float line_spacing = 2;
 
     Rectangle scissors = {m_x, m_y, m_width, m_height};
@@ -22,7 +24,7 @@ void TextView::render()
 	float x = 0;
 	float y = 0;
 	for (const auto& line : m_text) {
-		DrawTextEx(GetFontDefault(), line.c_str(), {m_x + x - m_scroll_x, m_y + y - m_scroll_y}, font_height, font_spacing, WHITE);
+		DrawTextEx(font, line.c_str(), {m_x + x - m_scroll_x, m_y + y - m_scroll_y}, font_height, font_spacing, WHITE);
 		y += font_height + line_spacing;
 	}
 
@@ -34,9 +36,10 @@ void TextView::render()
 	}
 
 	// cursor as "|"
-	float cursor_x = MeasureTextEx(GetFontDefault(), m_text[m_line].substr(0,m_cursor).c_str(), font_height, font_spacing).x;
+	float cursor_x = MeasureTextEx(font, m_text[m_line].substr(0,m_cursor).c_str(), font_height, font_spacing).x 
+					- MeasureTextEx(font, "|", font_height, font_spacing).x / 2;
 	float cursor_y = m_line * (font_height + line_spacing);
-	DrawTextEx(GetFontDefault(), "|", {m_x + cursor_x + 1 - m_scroll_x, m_y + cursor_y - m_scroll_y}, font_height, font_spacing, BLUE);
+	DrawTextEx(font, "|", {m_x + cursor_x - m_scroll_x, m_y + cursor_y - m_scroll_y}, font_height, font_spacing, BLUE);
 
     // end scissors
     EndScissorMode();

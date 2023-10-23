@@ -12,4 +12,7 @@ target_link_libraries(editor raylib)
 target_include_directories(editor PUBLIC vendor/raylib/src)
 target_compile_options(editor PUBLIC -Wall -Wextra -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Waggregate-return -Wcast-qual -Wswitch-default -Wswitch-enum -Wconversion -Wunreachable-code)
 
+file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+
 install(TARGETS editor DESTINATION bin)
+install(DIRECTORY assets DESTINATION bin)

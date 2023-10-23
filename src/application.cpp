@@ -4,6 +4,8 @@
 
 #include <fstream>
 
+Font font;
+
 App::App()
 {
 	m_text_view.set_width(800);
@@ -13,22 +15,28 @@ App::App()
 	m_text_input.set_height(40);
 	m_text_input.set_x(GetScreenWidth() / 2 - m_text_input.bounds().width / 2);
 	m_text_input.set_y(40);
-}
 
-void App::run()
-{
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
 	InitWindow(800, 600, "Hello World");
 
+	font = LoadFontEx("assets/fonts/Cascadia.ttf", 20, 0, 0);
+}
+
+App::~App()
+{
+	UnloadFont(font);
+	CloseWindow();
+}
+
+void App::run()
+{
 	while (m_running)
 	{
 		input();
 		update();
 		render();
 	}
-
-	CloseWindow();
 }
 
 void App::input()
