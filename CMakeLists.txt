@@ -14,5 +14,9 @@ target_compile_options(editor PUBLIC -Wall -Wextra -Wfloat-equal -Wundef -Wshado
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 
+if (APPLE) 
+    set_target_properties(editor PROPERTIES MACOSX_BUNDLE TRUE)
+endif()
+
 install(TARGETS editor DESTINATION bin)
 install(DIRECTORY assets DESTINATION bin)
