@@ -2,6 +2,8 @@
 
 #include <raylib.h>
 
+#include <iostream>
+
 extern Font font;
 
 TextView::TextView()
@@ -213,4 +215,34 @@ void TextView::set_text(const std::string& text)
 		line.push_back(c);
 	}
 	m_text = lines;
+}
+
+void TextView::mouse_click(int x, int y)
+{
+	if (!m_focused) return;
+
+	float font_height = 20;
+	float font_spacing = 1;
+	float line_spacing = 2;
+
+	float text_x = m_x - m_scroll_x;
+	float text_y = m_y - m_scroll_y;
+
+	int line = (y - text_y) / (font_height + line_spacing);
+	if (line < 0) line = 0;
+	if (line >= m_text.size()) line = m_text.size() - 1;
+
+	int cursor = 0;
+	float cursor_x = text_x;
+	for (const auto& c : m_text[line]) {
+		float char_width = MeasureTextEx(font, std::string(1, c).c_str(), font_height, font_spacing).x;
+		if (x > cursor_x && x < cursor_x + char_width) {
+			break;
+		}
+		cursor++;
+		cursor_x += char_width;
+	}
+
+	m_cursor = cursor;
+	m_line = line;
 }

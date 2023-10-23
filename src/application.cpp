@@ -122,6 +122,7 @@ void App::input()
 		m_text_view.set_focused(true);
 		m_text_input.set_focused(false);
 		m_text_input.set_visible(false);
+		m_text_view.mouse_click(GetMouseX(), GetMouseY());
 	}
 
 	if (IsKeyPressed(KEY_ESCAPE))

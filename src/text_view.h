@@ -34,6 +34,8 @@ public:
 
 	[[nodiscard]] Rectangle bounds() const { return {m_x, m_y, m_width, m_height}; }
 
+	void mouse_click(int x, int y);
+
 private:
     std::vector<std::string> m_text;
     float m_x = 0;
