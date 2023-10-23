@@ -20,7 +20,7 @@ App::App()
 
 	InitWindow(800, 600, "Hello World");
 
-	font = LoadFontEx("assets/fonts/Cascadia.ttf", 20, 0, 0);
+	font = LoadFontEx("assets/fonts/Cascadia.ttf", 40, 0, 0);
 }
 
 App::~App()
@@ -92,8 +92,8 @@ void App::input()
 
 	if (m_text_view.focused())
 	{
-		if (IsKeyPressed(KEY_ENTER)) m_text_view.insert_enter();
-		if (IsKeyPressed(KEY_BACKSPACE)) m_text_view.delete_left_char();
+		if (IsKeyPressed(KEY_ENTER) || IsKeyPressedRepeat(KEY_ENTER)) m_text_view.insert_enter();
+		if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE)) m_text_view.delete_left_char();
 		if (IsKeyPressed(KEY_TAB)) {
 			m_text_view.insert_char(' ');
 			m_text_view.insert_char(' ');

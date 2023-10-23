@@ -2,12 +2,7 @@
 
 #include <raylib.h>
 
-#include <sstream>
-#include <iostream>
-
 #include "highlight.h"
-
-#include <clang-c/Index.h>
 
 extern Font font;
 
@@ -21,10 +16,6 @@ TextView::TextView()
 
 void TextView::render()
 {
-	float font_height = 20;
-	float font_spacing = 1;
-	float line_spacing = 2;
-
     Rectangle scissors = {m_x, m_y, m_width, m_height};
     BeginScissorMode(static_cast<int>(scissors.x), static_cast<int>(scissors.y), static_cast<int>(scissors.width), static_cast<int>(scissors.height));
 
@@ -35,12 +26,12 @@ void TextView::render()
 		float x = 0;
 
 		for (const auto& t : token) {
-			float word_width = MeasureTextEx(font, t.text.c_str(), font_height, font_spacing).x;
-			DrawTextEx(font, t.text.c_str(), {m_x + x - m_scroll_x, m_y + y - m_scroll_y}, font_height, font_spacing, t.color);
-			x += word_width + font_spacing;
+			float word_width = MeasureTextEx(font, t.text.c_str(), m_font_height, m_font_spacing).x;
+			DrawTextEx(font, t.text.c_str(), {m_x + x - m_scroll_x, m_y + y - m_scroll_y}, m_font_height, m_font_spacing, t.color);
+			x += word_width + m_font_spacing;
 		}
 
-		y += font_height + line_spacing;
+		y += m_font_height + m_line_spacing;
 	}
 
 	float rate = 0.2f;
@@ -51,10 +42,10 @@ void TextView::render()
 	}
 
 	// cursor as "|"
-	float cursor_x = MeasureTextEx(font, m_text[m_line].substr(0,m_cursor).c_str(), font_height, font_spacing).x 
-					- MeasureTextEx(font, "|", font_height, font_spacing).x / 2;
-	float cursor_y = m_line * (font_height + line_spacing);
-	DrawTextEx(font, "|", {m_x + cursor_x - m_scroll_x, m_y + cursor_y - m_scroll_y}, font_height, font_spacing, BLUE);
+	float cursor_x = MeasureTextEx(font, m_text[m_line].substr(0,m_cursor).c_str(), m_font_height, m_font_spacing).x
+					- MeasureTextEx(font, "|", m_font_height, m_font_spacing).x / 2;
+	float cursor_y = m_line * (m_font_height + m_line_spacing);
+	DrawTextEx(font, "|", {m_x + cursor_x - m_scroll_x, m_y + cursor_y - m_scroll_y}, m_font_height, m_font_spacing, BLUE);
 
     // end scissors
     EndScissorMode();
@@ -267,28 +258,41 @@ void TextView::mouse_click(int x, int y)
 {
 	if (!m_focused) return;
 
-	float font_height = 20;
-	float font_spacing = 1;
-	float line_spacing = 2;
+	float font_height = m_font_height;
+	float font_spacing = m_font_spacing;
+	float line_spacing = m_line_spacing;
 
 	float text_x = m_x - m_scroll_x;
 	float text_y = m_y - m_scroll_y;
 
-	int line = (y - text_y) / (font_height + line_spacing);
+	int line = 0;
+	int cursor = 0;
+
+	// Calculate which line was clicked
+	line = static_cast<int>((y - text_y) / (font_height + line_spacing));
+
+	// If we have the lines of text stored in an array/vector
+	// Ensure that the click is within the bounds of our text
 	if (line < 0) line = 0;
 	if (line >= m_text.size()) line = m_text.size() - 1;
 
-	int cursor = 0;
-	float cursor_x = text_x;
-	for (const auto& c : m_text[line]) {
-		float char_width = MeasureTextEx(font, std::string(1, c).c_str(), font_height, font_spacing).x;
-		if (x > cursor_x && x < cursor_x + char_width) {
+	// Calculate cursor position within the line for variable-width font
+	float accumulatedWidth = 0;
+	for (int i = 0; i < m_text[line].length(); i++) {
+		float charWidth = MeasureTextEx(font, m_text[line].substr(i, 1).c_str(), m_font_height, m_font_spacing).x;
+
+		// Compare including the spacing
+		if (x - text_x < accumulatedWidth + charWidth) {
+			cursor = i;
 			break;
 		}
-		cursor++;
-		cursor_x += char_width;
+
+		accumulatedWidth += charWidth;
+	}
+	if (accumulatedWidth < (x - text_x)) { // If the click was beyond the end of the line
+		cursor = m_text[line].length();
 	}
 
-	m_cursor = cursor;
 	m_line = line;
+	m_cursor = cursor;
 }

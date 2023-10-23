@@ -50,4 +50,8 @@ private:
 
 	float m_scroll_x = 0;
 	float m_scroll_y = 0;
+
+	float m_font_height = 20;
+	float m_font_spacing = 1;
+	float m_line_spacing = 2;
 };
