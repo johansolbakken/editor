@@ -94,6 +94,12 @@ void App::input()
 	{
 		if (IsKeyPressed(KEY_ENTER)) m_text_view.insert_enter();
 		if (IsKeyPressed(KEY_BACKSPACE)) m_text_view.delete_left_char();
+		if (IsKeyPressed(KEY_TAB)) {
+			m_text_view.insert_char(' ');
+			m_text_view.insert_char(' ');
+			m_text_view.insert_char(' ');
+			m_text_view.insert_char(' ');
+		}
 
 		if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) m_text_view.move_cursor_left();
 		if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) m_text_view.move_cursor_right();
