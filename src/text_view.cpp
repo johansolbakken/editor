@@ -76,23 +76,45 @@ void TextView::insert_enter()
 {
 	if (!m_focused) return;
 
-	if (m_line == m_text.size() - 1) {
+	if (m_line == m_text.size() - 1 && m_cursor == m_text[m_line].size()) {
+		int space_count = 0;
+		for (const auto& c : m_text[m_line]) {
+			if (c == ' ') {
+				space_count++;
+			} else {
+				break;
+			}
+		}
 		m_text.emplace_back("");
+		for (int i = 0; i < space_count; i++) {
+			m_text[m_line + 1].push_back(' ');
+		}
 		m_line++;
-		m_cursor = 0;
+		m_cursor = space_count;
 		return;
 	}
 
 	if (m_cursor == m_text[m_line].size()) {
+		int space_count = 0;
+		for (const auto& c : m_text[m_line + 1]) {
+			if (c == ' ') {
+				space_count++;
+			} else {
+				break;
+			}
+		}
 		m_text.emplace(m_text.begin() + m_line + 1, "");
+		for (int i = 0; i < space_count; i++) {
+			m_text[m_line + 1].push_back(' ');
+		}
 		m_line++;
-		m_cursor = 0;
+		m_cursor = space_count;
 		return;
 	}
 
 	std::string before_cursor;
 	std::string new_line;
-
+	
 	for (int i = 0; i < m_text[m_line].size(); i++) {
 		if (i < m_cursor) {
 			before_cursor.push_back(m_text[m_line][i]);
@@ -101,10 +123,21 @@ void TextView::insert_enter()
 		}
 	}
 
+	int before_cursor_space_count = 0;
+	for (const auto& c : before_cursor) {
+		if (c == ' ') {
+			before_cursor_space_count++;
+		} else {
+			break;
+		}
+	}
+
+	new_line.insert(0, before_cursor.substr(0, before_cursor_space_count));
+
 	m_text[m_line] = before_cursor;
-	m_text.emplace(m_text.begin() + m_line + 1, new_line);
+	m_text.insert(m_text.begin() + m_line + 1, new_line);
 	m_line++;
-	m_cursor = 0;
+	m_cursor = before_cursor_space_count;
 }
 
 void TextView::delete_left_char()
