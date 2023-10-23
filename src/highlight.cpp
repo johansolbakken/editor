@@ -35,7 +35,8 @@ std::vector<std::vector<Token>> get_colors(const std::vector<std::string>& lines
 
 	// Index the text
 	CXIndex index = clang_createIndex(0, 0);
-	CXTranslationUnit unit = clang_parseTranslationUnit(index, "temp.cpp", nullptr, 0, nullptr, 0, CXTranslationUnit_None);
+	const char *args[] = {"-nostdinc"};
+	CXTranslationUnit unit = clang_parseTranslationUnit(index, "temp.cpp", args, 1, nullptr, 0, CXTranslationUnit_None);
 
 	// Tokenize
 	CXToken* tokens;
@@ -103,6 +104,17 @@ std::vector<std::vector<Token>> get_colors(const std::vector<std::string>& lines
 
 	// Remove the temporary file
 	remove("temp.cpp");
+
+	// find preprocessor directives and color lines
+	for (auto& line : lines) {
+		for (auto& token : line) {
+			if (token.text.starts_with("#")) {
+				for (auto& token : line)
+					token.color = color_scheme[PREPROCESSOR];
+				break;
+			}
+		}
+	}
 
 	return lines;
 }
