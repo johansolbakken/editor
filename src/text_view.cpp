@@ -2,7 +2,10 @@
 
 #include <raylib.h>
 
+#include <sstream>
 #include <iostream>
+
+#include "highlight.h"
 
 extern Font font;
 
@@ -23,10 +26,28 @@ void TextView::render()
     Rectangle scissors = {m_x, m_y, m_width, m_height};
     BeginScissorMode(static_cast<int>(scissors.x), static_cast<int>(scissors.y), static_cast<int>(scissors.width), static_cast<int>(scissors.height));
 
-	float x = 0;
+
 	float y = 0;
 	for (const auto& line : m_text) {
-		DrawTextEx(font, line.c_str(), {m_x + x - m_scroll_x, m_y + y - m_scroll_y}, font_height, font_spacing, WHITE);
+		std::stringstream ss(line);
+		std::string word;
+		int beginning_space_count = 0;
+		for (const auto& c : line) {
+			if (c == ' ') {
+				beginning_space_count++;
+			} else {
+				break;
+			}
+		}
+
+		float x = MeasureTextEx(font, " ", font_height, font_spacing).x * beginning_space_count;
+		while (ss >> word) {
+			float word_width = MeasureTextEx(font, word.c_str(), font_height, font_spacing).x;
+			Color color = get_color_for_token(word);
+			DrawTextEx(font, word.c_str(), {m_x + x - m_scroll_x, m_y + y - m_scroll_y}, font_height, font_spacing, color);
+			x += word_width + MeasureTextEx(font, " ", font_height, font_spacing).x;
+		}
+
 		y += font_height + line_spacing;
 	}
 
