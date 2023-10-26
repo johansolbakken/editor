@@ -43,7 +43,15 @@ void TextView::render()
 	}
 
 	// cursor as "|"
-	float cursor_x = MeasureTextEx(font, m_text[m_line].substr(0,m_cursor).c_str(), m_font_height, m_font_spacing).x
+	std::string current_line;
+	for (const auto& c : m_text[m_line]) {
+		if (c == '\t') {
+			current_line += "    ";
+		} else {
+			current_line += c;
+		}
+	}
+	float cursor_x = MeasureTextEx(font, current_line.substr(0,m_cursor).c_str(), m_font_height, m_font_spacing).x
 					- MeasureTextEx(font, "|", m_font_height, m_font_spacing).x / 2;
 	float cursor_y = m_line * (m_font_height + m_line_spacing);
 	DrawTextEx(font, "|", {m_x + cursor_x - m_scroll_x, m_y + cursor_y - m_scroll_y}, m_font_height, m_font_spacing, BLUE);

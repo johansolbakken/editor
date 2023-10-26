@@ -4,9 +4,12 @@
 
 #include <fstream>
 
+#include <iostream>
+
 Font font;
 
-App::App()
+App::App(const AppSpec& spec)
+	: m_spec(spec), m_search(spec.directory)
 {
 	m_text_view.set_width(800);
 	m_text_view.set_height(600);
@@ -15,6 +18,11 @@ App::App()
 	m_text_input.set_height(40);
 	m_text_input.set_x(GetScreenWidth() / 2 - m_text_input.bounds().width / 2);
 	m_text_input.set_y(40);
+
+	m_list_view.set_width(600);
+	m_list_view.set_height(200);
+	m_list_view.set_x(GetScreenWidth() / 2 - m_list_view.bounds().width / 2);
+	m_list_view.set_y(80);
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
@@ -56,6 +64,8 @@ void App::input()
 			m_text_input.set_focused(true);
 			m_text_input.set_text("");
 			m_text_input.cursor_to_end();
+
+			m_list_view.set_items({});
 		}
 		if (IsKeyPressed(KEY_S))
 		{
@@ -63,6 +73,11 @@ void App::input()
 		}
 		if (IsKeyPressed(KEY_O))
 		{
+			if (m_text_input.focused() && m_list_view.items().size() > 0)
+			{
+				open_file(m_list_view.selected_item());
+				return;
+			}
 			m_text_view.set_focused(false);
 			m_text_input.set_visible(true);
 			m_text_input.set_focused(true);
@@ -113,6 +128,8 @@ void App::input()
 
 		if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) m_text_input.move_cursor_left();
 		if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) m_text_input.move_cursor_right();
+		if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP)) m_list_view.move_cursor_up();
+		if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN)) m_list_view.move_cursor_down();
 
 		if (IsKeyPressed(KEY_ENTER)) parse_command();
 	}
@@ -142,7 +159,13 @@ void App::input()
 	auto mouse_scroll = GetMouseWheelMoveV();
 	if (m_text_input.focused())
 	{
-		m_text_input.scroll_horizontal(-mouse_scroll.x * scroll_speed);
+		if (CheckCollisionPointRec(GetMousePosition(), m_text_input.bounds()))
+			m_text_input.scroll_horizontal(-mouse_scroll.x * scroll_speed);
+
+		if (CheckCollisionPointRec(GetMousePosition(), m_list_view.bounds())) {
+			m_list_view.scroll_vertical(-mouse_scroll.y * scroll_speed);
+			m_list_view.scroll_horizontal(-mouse_scroll.x * scroll_speed);
+		}
 	}
 
 	if (m_text_view.focused())
@@ -160,6 +183,7 @@ void App::update()
 	m_text_view.update();
 	m_text_input.update();
 	m_text_input.set_x(GetScreenWidth() / 2 - m_text_input.bounds().width / 2);
+	m_list_view.set_x(GetScreenWidth() / 2 - m_list_view.bounds().width / 2);
 	SetWindowTitle(("Johan Editor - " + m_file_path).c_str());
 }
 
@@ -169,11 +193,13 @@ void App::render()
 	ClearBackground((Color){ 0, 0, 0, 255 });
 	m_text_view.render();
 	m_text_input.render();
+	if (m_text_input.visible() && m_list_view.items().size() > 0) {
+		m_list_view.render();
+	}
 	EndDrawing();
 }
 
-void App::parse_command():
-{
+void App::parse_command() {
 	std::string command = m_text_input.text();
 	command.erase(0, command.find_first_not_of(' '));
 	command.erase(command.find_last_not_of(' ') + 1);
@@ -201,6 +227,13 @@ void App::parse_command():
 	if (command == "new")
 	{
 		new_file();
+		return;
+	}
+
+	if (command.starts_with("find") && command.size() > 5) {
+		std::string query = command.substr(5);
+		auto matches = m_search.match_path(query);
+		m_list_view.set_items(matches);
 		return;
 	}
 }
