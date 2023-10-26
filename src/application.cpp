@@ -172,7 +172,7 @@ void App::render()
 	EndDrawing();
 }
 
-void App::parse_command()
+void App::parse_command():
 {
 	std::string command = m_text_input.text();
 	command.erase(0, command.find_first_not_of(' '));

@@ -25,7 +25,8 @@ void TextView::render()
 	for (const auto& token : tokens) {
 		float x = 0;
 
-		for (const auto& t : token) {
+		for (auto t : token) {
+			if (t.text == "\t") t.text = "    ";
 			float word_width = MeasureTextEx(font, t.text.c_str(), m_font_height, m_font_spacing).x;
 			DrawTextEx(font, t.text.c_str(), {m_x + x - m_scroll_x, m_y + y - m_scroll_y}, m_font_height, m_font_spacing, t.color);
 			x += word_width + m_font_spacing;
